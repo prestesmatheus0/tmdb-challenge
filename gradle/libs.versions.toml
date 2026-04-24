@@ -124,5 +124,6 @@ ifood-android-library = { id = "ifood.android.library" }
 ifood-android-feature = { id = "ifood.android.feature" }
 ifood-kotlin-library = { id = "ifood.kotlin.library" }
 ifood-android-compose = { id = "ifood.android.compose" }
-ifood-koin = { id = "ifood.koin" }
+movies-koin = { id = "movies.koin" }
+movies-koin-android = { id = "movies.koin.android" }
 ifood-android-test = { id = "ifood.android.test" }

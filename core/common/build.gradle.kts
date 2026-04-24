@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.ifood.android.library)
-    alias(libs.plugins.ifood.koin)
+    alias(libs.plugins.movies.koin.android)
 }
 
 android {

@@ -8,7 +8,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             with(pluginManager) {
                 apply("ifood.android.library")
                 apply("ifood.android.compose")
-                apply("ifood.koin")
+                apply("movies.koin.android")
             }
 
             dependencies {

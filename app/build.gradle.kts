@@ -3,7 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.ifood.android.application)
     alias(libs.plugins.ifood.android.compose)
-    alias(libs.plugins.ifood.koin)
+    alias(libs.plugins.movies.koin.android)
     alias(libs.plugins.ifood.android.test)
     alias(libs.plugins.kotlin.serialization)
 }

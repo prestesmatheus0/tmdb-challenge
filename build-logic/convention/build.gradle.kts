@@ -47,8 +47,12 @@ gradlePlugin {
             implementationClass = "KotlinLibraryConventionPlugin"
         }
         register("koin") {
-            id = "ifood.koin"
+            id = "movies.koin"
             implementationClass = "KoinConventionPlugin"
+        }
+        register("koinAndroid") {
+            id = "movies.koin.android"
+            implementationClass = "KoinAndroidConventionPlugin"
         }
         register("androidTest") {
             id = "ifood.android.test"
