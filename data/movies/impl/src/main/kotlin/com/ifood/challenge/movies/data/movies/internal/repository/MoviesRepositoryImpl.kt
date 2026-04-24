@@ -46,11 +46,26 @@ internal class MoviesRepositoryImpl(
             pagingSourceFactory = { DiscoverPagingSource(apiService, genreId) },
         ).flow
 
+    override fun searchPagingFlow(query: String): Flow<PagingData<Movie>> =
+        Pager(
+            config = PagingConfig(pageSize = PAGE_SIZE, enablePlaceholders = false),
+            pagingSourceFactory = { movieDao.searchPagingSource(escapeLikePattern(query)) },
+        ).flow.map { pagingData -> pagingData.map { it.toDomain() } }
+
+    private fun escapeLikePattern(input: String): String =
+        input
+            .replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_")
+
     override fun observeDetail(movieId: Int): Flow<MovieDetail?> =
         movieDetailDao.observe(movieId).map { it?.toDomain() }
 
     override fun observeIsFavorite(movieId: Int): Flow<Boolean> =
         favoriteDao.observeIsFavorite(movieId)
+
+    override fun observeAllFavoriteIds(): Flow<Set<Int>> =
+        favoriteDao.observeAll().map { list -> list.map { it.movieId }.toSet() }
 
     override suspend fun fetchGenres(): List<Genre> =
         apiService.genres().genres.map { it.toDomain() }
