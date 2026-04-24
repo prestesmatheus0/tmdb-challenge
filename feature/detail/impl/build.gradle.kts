@@ -12,6 +12,7 @@ dependencies {
 
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:network:public"))
     implementation(project(":domain:movies:public"))
 
     implementation(libs.coil.compose)

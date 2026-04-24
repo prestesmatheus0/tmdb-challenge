@@ -7,6 +7,7 @@ import com.ifood.challenge.movies.core.network.di.networkKoinModule
 import com.ifood.challenge.movies.data.movies.di.dataMoviesKoinModule
 import com.ifood.challenge.movies.di.appKoinModule
 import com.ifood.challenge.movies.domain.movies.di.domainMoviesKoinModule
+import com.ifood.challenge.movies.feature.detail.internal.detailKoinModule
 import com.ifood.challenge.movies.feature.home.internal.homeKoinModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -27,6 +28,7 @@ class IfoodMoviesApp : Application() {
                 dataMoviesKoinModule,
                 domainMoviesKoinModule,
                 homeKoinModule,
+                detailKoinModule,
             )
         }
     }
