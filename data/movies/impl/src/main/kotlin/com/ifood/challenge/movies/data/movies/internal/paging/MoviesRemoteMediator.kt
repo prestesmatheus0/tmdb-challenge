@@ -10,6 +10,7 @@ import com.ifood.challenge.movies.core.database.entity.RemoteKeyEntity
 import com.ifood.challenge.movies.core.database.internal.MoviesDatabase
 import com.ifood.challenge.movies.data.movies.internal.api.TmdbApiService
 import com.ifood.challenge.movies.data.movies.internal.mapper.toEntity
+import kotlinx.coroutines.CancellationException
 
 private const val STARTING_PAGE = 1
 private const val CACHE_TIMEOUT_MS = 30 * 60 * 1000L // 30 min
@@ -68,6 +69,8 @@ internal class MoviesRemoteMediator(
             }
 
             MediatorResult.Success(endOfPaginationReached = endOfPagination)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             MediatorResult.Error(e)
         }

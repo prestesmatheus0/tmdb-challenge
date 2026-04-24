@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.ifood.challenge.movies.data.movies.internal.api.TmdbApiService
 import com.ifood.challenge.movies.data.movies.internal.mapper.toDomain
 import com.ifood.challenge.movies.domain.movies.model.Movie
+import kotlinx.coroutines.CancellationException
 
 internal class DiscoverPagingSource(
     private val apiService: TmdbApiService,
@@ -25,6 +26,8 @@ internal class DiscoverPagingSource(
                 prevKey = if (page == 1) null else page - 1,
                 nextKey = if (page >= response.totalPages) null else page + 1,
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
