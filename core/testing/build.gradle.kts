@@ -7,6 +7,8 @@ android {
 }
 
 dependencies {
+    api(project(":core:common"))
+
     api(libs.junit)
     api(libs.mockk)
     api(libs.turbine)

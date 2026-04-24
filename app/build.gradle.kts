@@ -14,9 +14,16 @@ val tmdbApiKey: String = run {
     if (localProps.exists()) {
         localProps.inputStream().use { props.load(it) }
     }
-    props.getProperty("TMDB_API_KEY")
-        ?: System.getenv("TMDB_API_KEY")
-        ?: ""
+    val fromProps = props.getProperty("TMDB_API_KEY")
+    val fromEnv = System.getenv("TMDB_API_KEY")
+    val key = fromProps ?: fromEnv ?: ""
+    if (key.isBlank()) {
+        logger.warn(
+            "TMDB_API_KEY is empty. Set it in local.properties or as an environment " +
+                "variable before running the app. See README.",
+        )
+    }
+    key
 }
 
 android {
