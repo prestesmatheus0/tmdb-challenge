@@ -44,6 +44,17 @@ internal class DetailViewModel(
     )
 
     init {
+        loadDetail()
+    }
+
+    fun onRetry() {
+        if (isLoading.value) return
+        error.value = false
+        isLoading.value = true
+        loadDetail()
+    }
+
+    private fun loadDetail() {
         viewModelScope.launch {
             runCatching { fetchDetail(movieId) }
                 .onSuccess { isLoading.value = false }

@@ -60,6 +60,7 @@ internal fun DetailScreen(
     uiState: DetailUiState,
     onBack: () -> Unit,
     onFavoriteToggle: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     imageUrlBuilder: ImageUrlBuilder = koinInject(),
 ) {
@@ -74,7 +75,7 @@ internal fun DetailScreen(
         when {
             uiState.error -> ErrorState(
                 variant = ErrorVariant.Generic,
-                onRetry = {},
+                onRetry = onRetry,
                 modifier = Modifier.fillMaxSize(),
             )
             uiState.isLoading && uiState.detail == null -> DetailSkeleton()
