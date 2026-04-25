@@ -22,25 +22,24 @@ internal class DetailViewModel(
     private val setFavorite: SetFavoriteUseCase,
 ) : ViewModel() {
 
-    private val isLoading = MutableStateFlow(true)
-    private val error = MutableStateFlow(false)
+    private val isFetching = MutableStateFlow(true)
+    private val fetchFailed = MutableStateFlow(false)
 
     val uiState = combine(
         observeDetail(movieId),
         observeIsFavorite(movieId),
-        isLoading,
-        error,
-    ) { detail, isFavorite, loading, err ->
-        DetailUiState(
-            detail = detail,
-            isFavorite = isFavorite,
-            isLoading = loading,
-            error = err,
-        )
+        isFetching,
+        fetchFailed,
+    ) { detail, isFavorite, fetching, failed ->
+        when {
+            detail != null -> DetailUiState.Success(detail, isFavorite)
+            failed && !fetching -> DetailUiState.Error
+            else -> DetailUiState.Loading
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = DetailUiState(),
+        initialValue = DetailUiState.Loading,
     )
 
     init {
@@ -48,28 +47,27 @@ internal class DetailViewModel(
     }
 
     fun onRetry() {
-        if (isLoading.value) return
-        error.value = false
-        isLoading.value = true
+        if (isFetching.value) return
+        fetchFailed.value = false
+        isFetching.value = true
         loadDetail()
     }
 
     private fun loadDetail() {
         viewModelScope.launch {
             runCatching { fetchDetail(movieId) }
-                .onSuccess { isLoading.value = false }
+                .onSuccess { isFetching.value = false }
                 .onFailure {
-                    isLoading.value = false
-                    error.value = true
+                    isFetching.value = false
+                    fetchFailed.value = true
                 }
         }
     }
 
     fun onFavoriteToggle() {
-        val detail = uiState.value.detail ?: return
-        val isFavorite = uiState.value.isFavorite
+        val current = uiState.value as? DetailUiState.Success ?: return
         viewModelScope.launch {
-            setFavorite(detail.toMovie(), isFavorite = !isFavorite)
+            setFavorite(current.detail.toMovie(), isFavorite = !current.isFavorite)
         }
     }
 }

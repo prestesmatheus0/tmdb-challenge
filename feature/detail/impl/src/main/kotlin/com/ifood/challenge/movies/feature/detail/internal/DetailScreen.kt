@@ -73,14 +73,14 @@ internal fun DetailScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        when {
-            uiState.error -> ErrorState(
+        when (uiState) {
+            DetailUiState.Loading -> DetailSkeleton()
+            DetailUiState.Error -> ErrorState(
                 variant = ErrorVariant.Generic,
                 onRetry = onRetry,
                 modifier = Modifier.fillMaxSize(),
             )
-            uiState.isLoading && uiState.detail == null -> DetailSkeleton()
-            uiState.detail != null -> DetailContent(
+            is DetailUiState.Success -> DetailContent(
                 detail = uiState.detail,
                 isFavorite = uiState.isFavorite,
                 onFavoriteToggle = onFavoriteToggle,
@@ -90,9 +90,9 @@ internal fun DetailScreen(
         }
 
         CollapsingTopBar(
-            title = uiState.detail?.title.orEmpty(),
-            isFavorite = uiState.isFavorite,
-            showFavorite = uiState.detail != null,
+            title = (uiState as? DetailUiState.Success)?.detail?.title.orEmpty(),
+            isFavorite = (uiState as? DetailUiState.Success)?.isFavorite == true,
+            showFavorite = uiState is DetailUiState.Success,
             collapseAlpha = collapseAlpha,
             onBack = onBack,
             onFavoriteToggle = onFavoriteToggle,

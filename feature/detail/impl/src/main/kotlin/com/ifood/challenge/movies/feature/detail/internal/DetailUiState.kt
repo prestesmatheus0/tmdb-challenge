@@ -2,9 +2,13 @@ package com.ifood.challenge.movies.feature.detail.internal
 
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 
-internal data class DetailUiState(
-    val detail: MovieDetail? = null,
-    val isFavorite: Boolean = false,
-    val isLoading: Boolean = true,
-    val error: Boolean = false,
-)
+internal sealed interface DetailUiState {
+    data object Loading : DetailUiState
+
+    data class Success(
+        val detail: MovieDetail,
+        val isFavorite: Boolean,
+    ) : DetailUiState
+
+    data object Error : DetailUiState
+}
