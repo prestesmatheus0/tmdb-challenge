@@ -48,19 +48,16 @@ import com.ifood.challenge.movies.domain.movies.model.Movie
 import org.koin.compose.koinInject
 import com.ifood.challenge.movies.core.network.ImageUrlBuilder
 
-private const val FAVORITES_KEY = -1
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeScreen(
     uiState: HomeUiState,
     movies: LazyPagingItems<Movie>,
     onMovieClick: (movieId: Int) -> Unit,
-    onGenreSelect: (genreId: Int?) -> Unit,
+    onFilterSelect: (HomeFilter) -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onSearchToggle: () -> Unit,
     onFavoriteToggle: (Movie) -> Unit,
-    onFavoritesToggle: () -> Unit,
     onShuffle: () -> Unit,
     modifier: Modifier = Modifier,
     imageUrlBuilder: ImageUrlBuilder = koinInject(),
@@ -126,35 +123,28 @@ internal fun HomeScreen(
                 }
 
                 val modeChips = listOf(
-                    MovieFilterChip<Int?>(key = null, label = "Popular"),
-                    MovieFilterChip<Int?>(key = FAVORITES_KEY, label = "Favoritos"),
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.Popular, label = "Popular"),
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.Favorites, label = "Favoritos"),
                 )
-                val genreChips = uiState.genres.map { MovieFilterChip<Int?>(key = it.id, label = it.name) }
-                val allChips = if (uiState.showFavorites) {
+                val genreChips = uiState.genres.map {
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.Genre(it.id), label = it.name)
+                }
+                val allChips = if (uiState.filter is HomeFilter.Favorites) {
                     modeChips
                 } else {
-                    modeChips + MovieFilterChip<Int?>(key = null, label = "Todos") + genreChips
-                }
-                val selectedChip: Int? = when {
-                    uiState.showFavorites -> FAVORITES_KEY
-                    else -> uiState.selectedGenreId
+                    modeChips + genreChips
                 }
 
                 if (allChips.size > 1) {
                     FilterChipRow(
-                        chips = allChips.distinctBy { it.key },
-                        selected = selectedChip,
-                        onSelect = { key ->
-                            when (key) {
-                                FAVORITES_KEY -> onFavoritesToggle()
-                                else -> onGenreSelect(key)
-                            }
-                        },
+                        chips = allChips,
+                        selected = uiState.filter,
+                        onSelect = onFilterSelect,
                     )
                 }
 
-                when {
-                    uiState.showFavorites -> FavoritesContent(
+                when (uiState.filter) {
+                    HomeFilter.Favorites -> FavoritesContent(
                         movies = uiState.favoriteMovies,
                         favoriteIds = uiState.favoriteIds,
                         imageUrlBuilder = imageUrlBuilder,

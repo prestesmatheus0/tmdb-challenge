@@ -55,12 +55,12 @@ internal class HomeViewModel(
     val moviesPagingFlow: Flow<PagingData<Movie>> =
         combine(
             _uiState.map { it.searchQuery }.distinctUntilChanged(),
-            _uiState.map { it.selectedGenreId }.distinctUntilChanged(),
-        ) { query, genreId -> query to genreId }
-            .flatMapLatest { (query, genreId) ->
+            _uiState.map { it.filter }.distinctUntilChanged(),
+        ) { query, filter -> query to filter }
+            .flatMapLatest { (query, filter) ->
                 when {
                     query.length >= SEARCH_MIN_LENGTH -> getMoviesByQuery(query)
-                    genreId != null -> getMoviesByGenre(genreId)
+                    filter is HomeFilter.Genre -> getMoviesByGenre(filter.genreId)
                     else -> getPopularMovies()
                 }
             }
@@ -89,8 +89,7 @@ internal class HomeViewModel(
         _uiState.update {
             it.copy(
                 searchQuery = query,
-                showFavorites = false,
-                selectedGenreId = if (query.isNotEmpty()) null else it.selectedGenreId,
+                filter = if (it.filter is HomeFilter.Favorites) HomeFilter.Popular else it.filter,
             )
         }
     }
@@ -100,25 +99,17 @@ internal class HomeViewModel(
             if (state.isSearchActive) {
                 state.copy(isSearchActive = false, searchQuery = "")
             } else {
-                state.copy(isSearchActive = true, showFavorites = false)
+                state.copy(
+                    isSearchActive = true,
+                    filter = if (state.filter is HomeFilter.Favorites) HomeFilter.Popular else state.filter,
+                )
             }
         }
     }
 
-    fun onGenreSelect(genreId: Int?) {
+    fun onFilterSelect(filter: HomeFilter) {
         _uiState.update {
-            it.copy(selectedGenreId = genreId, searchQuery = "", isSearchActive = false, showFavorites = false)
-        }
-    }
-
-    fun onFavoritesToggle() {
-        _uiState.update { state ->
-            state.copy(
-                showFavorites = !state.showFavorites,
-                searchQuery = "",
-                isSearchActive = false,
-                selectedGenreId = null,
-            )
+            it.copy(filter = filter, searchQuery = "", isSearchActive = false)
         }
     }
 
