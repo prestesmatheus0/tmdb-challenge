@@ -122,18 +122,17 @@ internal fun HomeScreen(
                     OfflineBanner()
                 }
 
+                val favCount = uiState.favoriteIds.size
+                val favLabel = if (favCount > 0) "Favoritos · $favCount" else "Favoritos"
                 val modeChips = listOf(
                     MovieFilterChip<HomeFilter>(key = HomeFilter.Popular, label = "Popular"),
-                    MovieFilterChip<HomeFilter>(key = HomeFilter.Favorites, label = "Favoritos"),
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.Favorites, label = favLabel),
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.NowPlaying, label = "Mais Recentes"),
                 )
                 val genreChips = uiState.genres.map {
                     MovieFilterChip<HomeFilter>(key = HomeFilter.Genre(it.id), label = it.name)
                 }
-                val allChips = if (uiState.filter is HomeFilter.Favorites) {
-                    modeChips
-                } else {
-                    modeChips + genreChips
-                }
+                val allChips = modeChips + genreChips
 
                 if (allChips.size > 1) {
                     FilterChipRow(

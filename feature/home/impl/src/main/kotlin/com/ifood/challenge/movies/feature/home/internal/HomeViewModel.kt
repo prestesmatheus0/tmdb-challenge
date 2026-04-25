@@ -11,6 +11,7 @@ import com.ifood.challenge.movies.domain.movies.usecase.GetFavoriteMoviesUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetGenresUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByGenreUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByQueryUseCase
+import com.ifood.challenge.movies.domain.movies.usecase.GetNowPlayingMoviesUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetPopularMoviesUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.ObserveFavoriteIdsUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
@@ -33,6 +34,7 @@ private const val SEARCH_MIN_LENGTH = 2
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class HomeViewModel(
     private val getPopularMovies: GetPopularMoviesUseCase,
+    private val getNowPlayingMovies: GetNowPlayingMoviesUseCase,
     private val getMoviesByGenre: GetMoviesByGenreUseCase,
     private val getMoviesByQuery: GetMoviesByQueryUseCase,
     private val getGenres: GetGenresUseCase,
@@ -61,6 +63,7 @@ internal class HomeViewModel(
                 when {
                     query.length >= SEARCH_MIN_LENGTH -> getMoviesByQuery(query)
                     filter is HomeFilter.Genre -> getMoviesByGenre(filter.genreId)
+                    filter is HomeFilter.NowPlaying -> getNowPlayingMovies()
                     else -> getPopularMovies()
                 }
             }

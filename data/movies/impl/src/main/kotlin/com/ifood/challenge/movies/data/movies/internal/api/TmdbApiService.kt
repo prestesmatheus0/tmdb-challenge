@@ -11,6 +11,9 @@ internal interface TmdbApiService {
     @GET("movie/popular")
     suspend fun popular(@Query("page") page: Int): MovieListResponseDto
 
+    @GET("movie/now_playing")
+    suspend fun nowPlaying(@Query("page") page: Int): MovieListResponseDto
+
     @GET("discover/movie")
     suspend fun discover(
         @Query("page") page: Int,

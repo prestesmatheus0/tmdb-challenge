@@ -15,6 +15,7 @@ import com.ifood.challenge.movies.data.movies.internal.mapper.toEntity
 import com.ifood.challenge.movies.data.movies.internal.mapper.toFavoriteEntity
 import com.ifood.challenge.movies.data.movies.internal.paging.DiscoverPagingSource
 import com.ifood.challenge.movies.data.movies.internal.paging.MoviesRemoteMediator
+import com.ifood.challenge.movies.data.movies.internal.paging.NowPlayingPagingSource
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
@@ -39,6 +40,12 @@ internal class MoviesRepositoryImpl(
             remoteMediator = MoviesRemoteMediator(apiService, db),
             pagingSourceFactory = { movieDao.pagingSource() },
         ).flow.map { pagingData -> pagingData.map { it.toDomain() } }
+
+    override fun nowPlayingPagingFlow(): Flow<PagingData<Movie>> =
+        Pager(
+            config = PagingConfig(pageSize = PAGE_SIZE, enablePlaceholders = false),
+            pagingSourceFactory = { NowPlayingPagingSource(apiService) },
+        ).flow
 
     override fun discoverByGenrePagingFlow(genreId: Int): Flow<PagingData<Movie>> =
         Pager(
