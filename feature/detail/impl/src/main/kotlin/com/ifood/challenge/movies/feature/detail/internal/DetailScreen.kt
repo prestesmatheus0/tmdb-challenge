@@ -1,5 +1,6 @@
 package com.ifood.challenge.movies.feature.detail.internal
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,19 +27,25 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.ifood.challenge.movies.core.designsystem.component.ErrorState
@@ -56,6 +63,13 @@ internal fun DetailScreen(
     modifier: Modifier = Modifier,
     imageUrlBuilder: ImageUrlBuilder = koinInject(),
 ) {
+    val scrollState = rememberScrollState()
+    val density = LocalDensity.current
+    val collapseThresholdPx = remember(density) { with(density) { 300.dp.toPx() } }
+    val collapseAlpha by remember(scrollState) {
+        derivedStateOf { (scrollState.value / collapseThresholdPx).coerceIn(0f, 1f) }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         when {
             uiState.error -> ErrorState(
@@ -69,15 +83,85 @@ internal fun DetailScreen(
                 isFavorite = uiState.isFavorite,
                 onFavoriteToggle = onFavoriteToggle,
                 imageUrlBuilder = imageUrlBuilder,
+                scrollState = scrollState,
             )
         }
 
-        OverlayButtons(
+        CollapsingTopBar(
+            title = uiState.detail?.title.orEmpty(),
             isFavorite = uiState.isFavorite,
             showFavorite = uiState.detail != null,
+            collapseAlpha = collapseAlpha,
             onBack = onBack,
             onFavoriteToggle = onFavoriteToggle,
         )
+    }
+}
+
+@Composable
+private fun CollapsingTopBar(
+    title: String,
+    isFavorite: Boolean,
+    showFavorite: Boolean,
+    collapseAlpha: Float,
+    onBack: () -> Unit,
+    onFavoriteToggle: () -> Unit,
+) {
+    val circleAlpha = (1f - collapseAlpha) * 0.35f
+    val iconTint = lerp(Color.White, MaterialTheme.colorScheme.onSurface, collapseAlpha)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = collapseAlpha))
+            .statusBarsPadding()
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = circleAlpha)),
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Voltar",
+                tint = iconTint,
+            )
+        }
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 8.dp)
+                .alpha(collapseAlpha),
+        )
+
+        if (showFavorite) {
+            IconButton(
+                onClick = onFavoriteToggle,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = circleAlpha)),
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Remover dos favoritos" else "Adicionar aos favoritos",
+                    tint = iconTint,
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
+        }
     }
 }
 
@@ -88,8 +172,9 @@ private fun DetailContent(
     isFavorite: Boolean,
     onFavoriteToggle: () -> Unit,
     imageUrlBuilder: ImageUrlBuilder,
+    scrollState: ScrollState,
 ) {
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
         Box(modifier = Modifier.fillMaxWidth().height(360.dp)) {
             AsyncImage(
                 model = imageUrlBuilder.poster(detail.posterPath),
@@ -226,52 +311,6 @@ private fun DetailContent(
                     )
                     Text("Adicionar aos favoritos")
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun OverlayButtons(
-    isFavorite: Boolean,
-    showFavorite: Boolean,
-    onBack: () -> Unit,
-    onFavoriteToggle: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        IconButton(
-            onClick = onBack,
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.35f)),
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar",
-                tint = Color.White,
-            )
-        }
-
-        if (showFavorite) {
-            IconButton(
-                onClick = onFavoriteToggle,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.35f)),
-            ) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = if (isFavorite) "Remover dos favoritos" else "Adicionar aos favoritos",
-                    tint = Color.White,
-                )
             }
         }
     }

@@ -165,6 +165,7 @@ internal fun HomeScreen(
                         movies = movies,
                         favoriteIds = uiState.favoriteIds,
                         isOffline = uiState.isOffline,
+                        isSearchActive = uiState.isSearchActive,
                         imageUrlBuilder = imageUrlBuilder,
                         onMovieClick = onMovieClick,
                         onFavoriteToggle = onFavoriteToggle,
@@ -218,6 +219,7 @@ private fun PagingContent(
     movies: LazyPagingItems<Movie>,
     favoriteIds: Set<Int>,
     isOffline: Boolean,
+    isSearchActive: Boolean,
     imageUrlBuilder: ImageUrlBuilder,
     onMovieClick: (Int) -> Unit,
     onFavoriteToggle: (Movie) -> Unit,
@@ -231,9 +233,9 @@ private fun PagingContent(
             modifier = Modifier.fillMaxSize(),
         )
         movies.itemCount == 0 && refreshState is LoadState.NotLoading -> EmptyState(
-            icon = Icons.Default.Movie,
-            title = "Nenhum filme encontrado",
-            description = "Tente outra busca ou gênero",
+            icon = if (isSearchActive) Icons.Default.SearchOff else Icons.Default.Movie,
+            title = if (isSearchActive) "Sem resultados" else "Nenhum filme encontrado",
+            description = if (isSearchActive) "Tente outro termo de busca" else "Tente outro gênero",
             modifier = Modifier.fillMaxSize(),
         )
         else -> MovieGrid(
