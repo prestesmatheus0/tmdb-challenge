@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.ifood.challenge.movies.core.designsystem.component.ErrorState
 import com.ifood.challenge.movies.core.designsystem.component.ErrorVariant
+import com.ifood.challenge.movies.core.designsystem.component.ShimmerBox
 import com.ifood.challenge.movies.core.network.ImageUrlBuilder
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 import org.koin.compose.koinInject
@@ -320,11 +321,10 @@ private fun DetailContent(
 @Composable
 private fun DetailSkeleton() {
     Column(modifier = Modifier.fillMaxSize()) {
-        Box(
+        ShimmerBox(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(360.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .height(360.dp),
         )
         Column(
             modifier = Modifier
@@ -333,12 +333,11 @@ private fun DetailSkeleton() {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             repeat(5) {
-                Box(
+                ShimmerBox(
                     modifier = Modifier
                         .fillMaxWidth(if (it == 0) 0.7f else 1f)
                         .height(16.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                        .clip(RoundedCornerShape(4.dp)),
                 )
             }
         }
