@@ -21,10 +21,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.ifood.challenge.movies.core.designsystem.R
 
 enum class ErrorVariant { Network, Generic, Timeout, Server }
 
@@ -34,7 +37,9 @@ fun ErrorState(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val (icon, title, description) = errorContent(variant)
+    val content = errorContent(variant)
+    val title = stringResource(content.titleRes)
+    val description = stringResource(content.descriptionRes)
     Column(
         modifier =
             modifier
@@ -53,7 +58,7 @@ fun ErrorState(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = icon,
+                imageVector = content.icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier.size(36.dp),
@@ -78,38 +83,42 @@ fun ErrorState(
             onClick = onRetry,
             modifier = Modifier.testTag(ErrorStateTestTags.retry),
         ) {
-            Text("Tentar novamente")
+            Text(stringResource(R.string.error_retry))
         }
     }
 }
 
-private data class ErrorContent(val icon: ImageVector, val title: String, val description: String)
+private data class ErrorContent(
+    val icon: ImageVector,
+    @StringRes val titleRes: Int,
+    @StringRes val descriptionRes: Int,
+)
 
 private fun errorContent(variant: ErrorVariant): ErrorContent =
     when (variant) {
         ErrorVariant.Network ->
             ErrorContent(
                 icon = Icons.Filled.SignalWifiConnectedNoInternet4,
-                title = "Sem conexão",
-                description = "Verifique sua internet e tente novamente.",
+                titleRes = R.string.error_network_title,
+                descriptionRes = R.string.error_network_description,
             )
         ErrorVariant.Timeout ->
             ErrorContent(
                 icon = Icons.Filled.Schedule,
-                title = "Tempo esgotado",
-                description = "A requisição demorou demais. Tente novamente.",
+                titleRes = R.string.error_timeout_title,
+                descriptionRes = R.string.error_timeout_description,
             )
         ErrorVariant.Server ->
             ErrorContent(
                 icon = Icons.Filled.CloudOff,
-                title = "Servidor indisponível",
-                description = "Estamos com instabilidade. Tente novamente em instantes.",
+                titleRes = R.string.error_server_title,
+                descriptionRes = R.string.error_server_description,
             )
         ErrorVariant.Generic ->
             ErrorContent(
                 icon = Icons.Filled.Error,
-                title = "Algo deu errado",
-                description = "Não conseguimos carregar os filmes.",
+                titleRes = R.string.error_generic_title,
+                descriptionRes = R.string.error_generic_description,
             )
     }
 

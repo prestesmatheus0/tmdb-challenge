@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -68,12 +69,14 @@ internal fun HomeScreen(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text("Filmes") },
+                title = { Text(stringResource(R.string.home_title)) },
                 actions = {
                     IconButton(onClick = onSearchToggle) {
                         Icon(
                             imageVector = if (uiState.isSearchActive) Icons.Default.SearchOff else Icons.Default.Search,
-                            contentDescription = if (uiState.isSearchActive) "Fechar busca" else "Buscar",
+                            contentDescription = stringResource(
+                                if (uiState.isSearchActive) R.string.home_search_close else R.string.home_search_open,
+                            ),
                         )
                     }
                 },
@@ -88,7 +91,7 @@ internal fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shuffle,
-                        contentDescription = "Filme aleatório dos favoritos",
+                        contentDescription = stringResource(R.string.home_shuffle_description),
                     )
                 }
             }
@@ -105,7 +108,7 @@ internal fun HomeScreen(
                                 onSearch = {},
                                 expanded = false,
                                 onExpandedChange = {},
-                                placeholder = { Text("Buscar filmes…") },
+                                placeholder = { Text(stringResource(R.string.home_search_placeholder)) },
                             )
                         },
                         expanded = false,
@@ -123,11 +126,15 @@ internal fun HomeScreen(
                 }
 
                 val favCount = uiState.favoriteIds.size
-                val favLabel = if (favCount > 0) "Favoritos · $favCount" else "Favoritos"
+                val favLabel = if (favCount > 0) {
+                    stringResource(R.string.home_chip_favorites_count, favCount)
+                } else {
+                    stringResource(R.string.home_chip_favorites)
+                }
                 val modeChips = listOf(
-                    MovieFilterChip<HomeFilter>(key = HomeFilter.Popular, label = "Popular"),
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.Popular, label = stringResource(R.string.home_chip_popular)),
                     MovieFilterChip<HomeFilter>(key = HomeFilter.Favorites, label = favLabel),
-                    MovieFilterChip<HomeFilter>(key = HomeFilter.NowPlaying, label = "Mais Recentes"),
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.NowPlaying, label = stringResource(R.string.home_chip_now_playing)),
                 )
                 val genreChips = uiState.genres.map {
                     MovieFilterChip<HomeFilter>(key = HomeFilter.Genre(it.id), label = it.name)
@@ -176,8 +183,8 @@ private fun FavoritesContent(
     if (movies.isEmpty()) {
         EmptyState(
             icon = Icons.Default.Movie,
-            title = "Nenhum favorito ainda",
-            description = "Favorite filmes para vê-los aqui",
+            title = stringResource(R.string.home_favorites_empty_title),
+            description = stringResource(R.string.home_favorites_empty_description),
             modifier = Modifier.fillMaxSize(),
         )
     } else {
@@ -223,8 +230,8 @@ private fun PagingContent(
         )
         movies.itemCount == 0 && refreshState is LoadState.NotLoading -> EmptyState(
             icon = if (isSearchActive) Icons.Default.SearchOff else Icons.Default.Movie,
-            title = if (isSearchActive) "Sem resultados" else "Nenhum filme encontrado",
-            description = if (isSearchActive) "Tente outro termo de busca" else "Tente outro gênero",
+            title = stringResource(if (isSearchActive) R.string.home_search_empty_title else R.string.home_movies_empty_title),
+            description = stringResource(if (isSearchActive) R.string.home_search_empty_description else R.string.home_movies_empty_description),
             modifier = Modifier.fillMaxSize(),
         )
         else -> MovieGrid(

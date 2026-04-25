@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="detail_back">Voltar</string>
+    <string name="detail_remove_favorite">Remover dos favoritos</string>
+    <string name="detail_add_favorite">Adicionar aos favoritos</string>
+    <string name="detail_synopsis">Sinopse</string>
+    <string name="detail_runtime">· %1$dmin</string>
+</resources>

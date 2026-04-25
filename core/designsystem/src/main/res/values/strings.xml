@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ErrorState -->
+    <string name="error_retry">Tentar novamente</string>
+    <string name="error_network_title">Sem conexão</string>
+    <string name="error_network_description">Verifique sua internet e tente novamente.</string>
+    <string name="error_timeout_title">Tempo esgotado</string>
+    <string name="error_timeout_description">A requisição demorou demais. Tente novamente.</string>
+    <string name="error_server_title">Servidor indisponível</string>
+    <string name="error_server_description">Estamos com instabilidade. Tente novamente em instantes.</string>
+    <string name="error_generic_title">Algo deu errado</string>
+    <string name="error_generic_description">Não conseguimos carregar os filmes.</string>
+
+    <!-- OfflineBanner -->
+    <string name="offline_banner_message">Você está offline. Exibindo dados em cache.</string>
+
+    <!-- MovieCard -->
+    <string name="movie_card_remove_favorite">Remover %1$s dos favoritos</string>
+    <string name="movie_card_add_favorite">Favoritar %1$s</string>
+</resources>

@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -130,7 +131,7 @@ private fun CollapsingTopBar(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar",
+                contentDescription = stringResource(R.string.detail_back),
                 tint = iconTint,
             )
         }
@@ -157,7 +158,9 @@ private fun CollapsingTopBar(
             ) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = if (isFavorite) "Remover dos favoritos" else "Adicionar aos favoritos",
+                    contentDescription = stringResource(
+                        if (isFavorite) R.string.detail_remove_favorite else R.string.detail_add_favorite,
+                    ),
                     tint = iconTint,
                 )
             }
@@ -239,7 +242,7 @@ private fun DetailContent(
                 }
                 detail.runtimeMinutes?.let { runtime ->
                     Text(
-                        text = "· ${runtime}min",
+                        text = stringResource(R.string.detail_runtime, runtime),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -274,7 +277,7 @@ private fun DetailContent(
             if (detail.overview.isNotBlank()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Sinopse",
+                    text = stringResource(R.string.detail_synopsis),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -298,7 +301,7 @@ private fun DetailContent(
                         contentDescription = null,
                         modifier = Modifier.padding(end = 8.dp),
                     )
-                    Text("Remover dos favoritos")
+                    Text(stringResource(R.string.detail_remove_favorite))
                 }
             } else {
                 Button(
@@ -311,7 +314,7 @@ private fun DetailContent(
                         contentDescription = null,
                         modifier = Modifier.padding(end = 8.dp),
                     )
-                    Text("Adicionar aos favoritos")
+                    Text(stringResource(R.string.detail_add_favorite))
                 }
             }
         }

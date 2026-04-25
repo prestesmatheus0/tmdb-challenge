@@ -31,12 +31,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.ifood.challenge.movies.core.designsystem.R
 import com.ifood.challenge.movies.core.designsystem.theme.MotionTokens
 
 @Composable
@@ -154,9 +156,9 @@ private fun FavoriteButton(
                 if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
             contentDescription =
                 if (isFavorite) {
-                    "Remover $title dos favoritos"
+                    stringResource(R.string.movie_card_remove_favorite, title)
                 } else {
-                    "Favoritar $title"
+                    stringResource(R.string.movie_card_add_favorite, title)
                 },
             tint = if (isFavorite) MaterialTheme.colorScheme.primary else Color.White,
         )

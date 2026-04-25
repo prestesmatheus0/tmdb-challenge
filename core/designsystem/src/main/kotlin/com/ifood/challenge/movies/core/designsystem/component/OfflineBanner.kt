@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ifood.challenge.movies.core.designsystem.R
 
 @Composable
 fun OfflineBanner(modifier: Modifier = Modifier) {
@@ -36,7 +38,7 @@ fun OfflineBanner(modifier: Modifier = Modifier) {
             modifier = Modifier.size(18.dp),
         )
         Text(
-            text = "Você está offline. Exibindo dados em cache.",
+            text = stringResource(R.string.offline_banner_message),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onTertiaryContainer,
         )
