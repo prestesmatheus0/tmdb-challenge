@@ -13,6 +13,7 @@ interface MoviesRepository {
     fun observeDetail(movieId: Int): Flow<MovieDetail?>
     fun observeIsFavorite(movieId: Int): Flow<Boolean>
     fun observeAllFavoriteIds(): Flow<Set<Int>>
+    fun observeFavoriteMovies(): Flow<List<Movie>>
     suspend fun fetchGenres(): List<Genre>
     suspend fun fetchAndCacheDetail(movieId: Int)
     suspend fun setFavorite(movie: Movie, isFavorite: Boolean)

@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import com.ifood.challenge.movies.core.common.network.ConnectivityObserver
 import com.ifood.challenge.movies.core.common.network.NetworkStatus
 import com.ifood.challenge.movies.domain.movies.model.Movie
+import com.ifood.challenge.movies.domain.movies.usecase.GetFavoriteMoviesUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetGenresUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByGenreUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByQueryUseCase
@@ -15,9 +16,10 @@ import com.ifood.challenge.movies.domain.movies.usecase.ObserveFavoriteIdsUseCas
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -35,6 +37,7 @@ internal class HomeViewModel(
     private val getMoviesByQuery: GetMoviesByQueryUseCase,
     private val getGenres: GetGenresUseCase,
     private val setFavorite: SetFavoriteUseCase,
+    private val getFavoriteMovies: GetFavoriteMoviesUseCase,
     observeFavoriteIds: ObserveFavoriteIdsUseCase,
     connectivityObserver: ConnectivityObserver,
 ) : ViewModel() {
@@ -45,6 +48,9 @@ internal class HomeViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = HomeUiState(),
     )
+
+    private val _shuffleEvent = MutableSharedFlow<Int>(extraBufferCapacity = 1)
+    val shuffleEvent = _shuffleEvent.asSharedFlow()
 
     val moviesPagingFlow: Flow<PagingData<Movie>> =
         combine(
@@ -67,6 +73,11 @@ internal class HomeViewModel(
             }
         }
         viewModelScope.launch {
+            getFavoriteMovies().collect { movies ->
+                _uiState.update { it.copy(favoriteMovies = movies) }
+            }
+        }
+        viewModelScope.launch {
             connectivityObserver.observe().collect { status ->
                 _uiState.update { it.copy(isOffline = status == NetworkStatus.Offline) }
             }
@@ -75,7 +86,13 @@ internal class HomeViewModel(
     }
 
     fun onSearchQueryChange(query: String) {
-        _uiState.update { it.copy(searchQuery = query, selectedGenreId = if (query.isNotEmpty()) null else it.selectedGenreId) }
+        _uiState.update {
+            it.copy(
+                searchQuery = query,
+                showFavorites = false,
+                selectedGenreId = if (query.isNotEmpty()) null else it.selectedGenreId,
+            )
+        }
     }
 
     fun onSearchToggle() {
@@ -83,19 +100,39 @@ internal class HomeViewModel(
             if (state.isSearchActive) {
                 state.copy(isSearchActive = false, searchQuery = "")
             } else {
-                state.copy(isSearchActive = true)
+                state.copy(isSearchActive = true, showFavorites = false)
             }
         }
     }
 
     fun onGenreSelect(genreId: Int?) {
-        _uiState.update { it.copy(selectedGenreId = genreId, searchQuery = "", isSearchActive = false) }
+        _uiState.update {
+            it.copy(selectedGenreId = genreId, searchQuery = "", isSearchActive = false, showFavorites = false)
+        }
+    }
+
+    fun onFavoritesToggle() {
+        _uiState.update { state ->
+            state.copy(
+                showFavorites = !state.showFavorites,
+                searchQuery = "",
+                isSearchActive = false,
+                selectedGenreId = null,
+            )
+        }
     }
 
     fun onFavoriteToggle(movie: Movie) {
         val isCurrentlyFavorite = movie.id in _uiState.value.favoriteIds
         viewModelScope.launch {
             setFavorite(movie, isFavorite = !isCurrentlyFavorite)
+        }
+    }
+
+    fun onShuffle() {
+        val favorites = _uiState.value.favoriteMovies
+        if (favorites.isNotEmpty()) {
+            _shuffleEvent.tryEmit(favorites.random().id)
         }
     }
 

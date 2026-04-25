@@ -1,5 +1,6 @@
 package com.ifood.challenge.movies.feature.home.internal
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
@@ -14,6 +15,10 @@ fun NavGraphBuilder.homeScreen(onMovieClick: (movieId: Int) -> Unit) {
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         val movies = viewModel.moviesPagingFlow.collectAsLazyPagingItems()
 
+        LaunchedEffect(viewModel.shuffleEvent) {
+            viewModel.shuffleEvent.collect { movieId -> onMovieClick(movieId) }
+        }
+
         HomeScreen(
             uiState = uiState,
             movies = movies,
@@ -22,6 +27,8 @@ fun NavGraphBuilder.homeScreen(onMovieClick: (movieId: Int) -> Unit) {
             onSearchQueryChange = viewModel::onSearchQueryChange,
             onSearchToggle = viewModel::onSearchToggle,
             onFavoriteToggle = viewModel::onFavoriteToggle,
+            onFavoritesToggle = viewModel::onFavoritesToggle,
+            onShuffle = viewModel::onShuffle,
         )
     }
 }

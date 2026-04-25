@@ -12,6 +12,7 @@ val homeKoinModule =
                 getMoviesByQuery = get(),
                 getGenres = get(),
                 setFavorite = get(),
+                getFavoriteMovies = get(),
                 observeFavoriteIds = get(),
                 connectivityObserver = get(),
             )
