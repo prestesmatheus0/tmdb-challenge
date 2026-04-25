@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.androidx.room.paging)
     ksp(libs.androidx.room.compiler)
 
+    testImplementation(project(":core:testing"))
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.okhttp.mockwebserver)

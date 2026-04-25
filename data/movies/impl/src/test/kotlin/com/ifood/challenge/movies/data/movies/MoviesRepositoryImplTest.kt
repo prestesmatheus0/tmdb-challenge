@@ -11,6 +11,7 @@ import com.ifood.challenge.movies.data.movies.internal.api.TmdbApiService
 import com.ifood.challenge.movies.data.movies.internal.api.dto.GenreDto
 import com.ifood.challenge.movies.data.movies.internal.api.dto.GenreListResponseDto
 import com.ifood.challenge.movies.data.movies.internal.api.dto.MovieDetailDto
+import com.ifood.challenge.movies.core.testing.TestDispatcherProvider
 import com.ifood.challenge.movies.data.movies.internal.repository.MoviesRepositoryImpl
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import io.mockk.coEvery
@@ -37,6 +38,7 @@ class MoviesRepositoryImplTest {
         movieDao = movieDao,
         movieDetailDao = movieDetailDao,
         favoriteDao = favoriteDao,
+        dispatchers = TestDispatcherProvider(),
     )
 
     private val movie = Movie(

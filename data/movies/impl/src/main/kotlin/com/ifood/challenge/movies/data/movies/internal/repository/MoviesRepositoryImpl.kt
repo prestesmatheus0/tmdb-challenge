@@ -16,12 +16,14 @@ import com.ifood.challenge.movies.data.movies.internal.mapper.toFavoriteEntity
 import com.ifood.challenge.movies.data.movies.internal.paging.DiscoverPagingSource
 import com.ifood.challenge.movies.data.movies.internal.paging.MoviesRemoteMediator
 import com.ifood.challenge.movies.data.movies.internal.paging.NowPlayingPagingSource
+import com.ifood.challenge.movies.core.common.coroutines.DispatcherProvider
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 import com.ifood.challenge.movies.domain.movies.repository.MoviesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 private const val PAGE_SIZE = 20
 
@@ -32,6 +34,7 @@ internal class MoviesRepositoryImpl(
     private val movieDao: MovieDao,
     private val movieDetailDao: MovieDetailDao,
     private val favoriteDao: FavoriteDao,
+    private val dispatchers: DispatcherProvider,
 ) : MoviesRepository {
 
     override fun popularPagingFlow(): Flow<PagingData<Movie>> =
@@ -90,15 +93,16 @@ internal class MoviesRepositoryImpl(
             }
         }
 
-    override suspend fun fetchGenres(): List<Genre> =
+    override suspend fun fetchGenres(): List<Genre> = withContext(dispatchers.io) {
         apiService.genres().genres.map { it.toDomain() }
+    }
 
-    override suspend fun fetchAndCacheDetail(movieId: Int) {
+    override suspend fun fetchAndCacheDetail(movieId: Int) = withContext(dispatchers.io) {
         val detail = apiService.movieDetail(movieId)
         movieDetailDao.upsert(detail.toEntity())
     }
 
-    override suspend fun setFavorite(movie: Movie, isFavorite: Boolean) {
+    override suspend fun setFavorite(movie: Movie, isFavorite: Boolean) = withContext(dispatchers.io) {
         if (isFavorite) {
             favoriteDao.upsert(movie.toFavoriteEntity())
         } else {

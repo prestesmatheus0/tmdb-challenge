@@ -16,6 +16,7 @@ val dataMoviesKoinModule =
                 movieDao = get(),
                 movieDetailDao = get(),
                 favoriteDao = get(),
+                dispatchers = get(),
             )
         }
     }
