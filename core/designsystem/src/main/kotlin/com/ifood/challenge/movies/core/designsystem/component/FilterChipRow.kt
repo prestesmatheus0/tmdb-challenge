@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
+import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
 import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
@@ -67,7 +67,7 @@ object FilterChipRowTestTags {
     fun chip(label: String) = "filter_chip_$label"
 }
 
-@ThemePreviews
+@PreviewThemes
 @Composable
 private fun FilterChipRowPreview() {
     IfoodMoviesTheme {

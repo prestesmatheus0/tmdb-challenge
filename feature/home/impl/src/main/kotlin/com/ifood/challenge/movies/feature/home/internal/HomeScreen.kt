@@ -45,7 +45,7 @@ import com.ifood.challenge.movies.core.designsystem.component.MovieCard
 import com.ifood.challenge.movies.core.designsystem.component.MovieCardSkeleton
 import com.ifood.challenge.movies.core.designsystem.component.MovieFilterChip
 import com.ifood.challenge.movies.core.designsystem.component.OfflineBanner
-import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
+import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
 import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
 import com.ifood.challenge.movies.core.network.BackdropSize
@@ -332,7 +332,7 @@ private val PREVIEW_IMAGE_BUILDER = object : ImageUrlBuilder {
     override fun backdrop(path: String?, size: BackdropSize) = ""
 }
 
-@ThemePreviews
+@PreviewThemes
 @Composable
 private fun HomeScreenEmptyPreview() {
     IfoodMoviesTheme {
@@ -351,7 +351,7 @@ private fun HomeScreenEmptyPreview() {
     }
 }
 
-@ThemePreviews
+@PreviewThemes
 @Composable
 private fun HomeScreenFavoritesPreview() {
     IfoodMoviesTheme {
@@ -375,7 +375,7 @@ private fun HomeScreenFavoritesPreview() {
     }
 }
 
-@ThemePreviews
+@PreviewThemes
 @Composable
 private fun HomeScreenOfflinePreview() {
     IfoodMoviesTheme {

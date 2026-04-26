@@ -21,7 +21,7 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
+import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
 import com.ifood.challenge.movies.core.designsystem.theme.Dimens
 import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
@@ -81,7 +81,7 @@ object EmptyStateTestTags {
     const val searchEmpty = "empty_state_search"
 }
 
-@ThemePreviews
+@PreviewThemes
 @Composable
 private fun EmptyStatePreview() {
     IfoodMoviesTheme {

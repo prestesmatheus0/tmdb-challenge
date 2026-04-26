@@ -50,7 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.ifood.challenge.movies.core.designsystem.component.ErrorState
-import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
+import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
 import com.ifood.challenge.movies.core.designsystem.theme.Dimens
 import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
@@ -372,7 +372,7 @@ private val PREVIEW_IMAGE_BUILDER = object : ImageUrlBuilder {
     override fun backdrop(path: String?, size: BackdropSize) = ""
 }
 
-@ThemePreviews
+@PreviewThemes
 @Composable
 private fun DetailScreenLoadingPreview() {
     IfoodMoviesTheme {
@@ -386,7 +386,7 @@ private fun DetailScreenLoadingPreview() {
     }
 }
 
-@ThemePreviews
+@PreviewThemes
 @Composable
 private fun DetailScreenErrorPreview() {
     IfoodMoviesTheme {
@@ -400,7 +400,7 @@ private fun DetailScreenErrorPreview() {
     }
 }
 
-@ThemePreviews
+@PreviewThemes
 @Composable
 private fun DetailScreenSuccessPreview() {
     IfoodMoviesTheme {

@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.detekt) apply false
 }
 
+val detektCompose = libs.detekt.compose
+
 subprojects {
     apply(plugin = rootProject.libs.plugins.ktlint.get().pluginId)
     apply(plugin = rootProject.libs.plugins.detekt.get().pluginId)
@@ -29,6 +31,11 @@ subprojects {
         toolVersion = rootProject.libs.versions.detekt.get()
         buildUponDefaultConfig = true
         allRules = false
+        config.setFrom(files("${rootProject.projectDir}/config/detekt/detekt.yml"))
         source.setFrom(files("src/main/kotlin", "src/main/java"))
+    }
+
+    dependencies {
+        add("detektPlugins", detektCompose)
     }
 }

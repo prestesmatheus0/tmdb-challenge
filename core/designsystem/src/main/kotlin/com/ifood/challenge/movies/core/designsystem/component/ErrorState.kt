@@ -30,7 +30,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.ifood.challenge.movies.core.designsystem.R
-import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
+import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
 import com.ifood.challenge.movies.core.designsystem.theme.Dimens
 import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
@@ -138,7 +138,7 @@ private class ErrorVariantParam : PreviewParameterProvider<ErrorVariant> {
     override val values = ErrorVariant.values().asSequence()
 }
 
-@ThemePreviews
+@PreviewThemes
 @Composable
 private fun ErrorStatePreview(
     @PreviewParameter(ErrorVariantParam::class) variant: ErrorVariant,

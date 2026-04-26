@@ -13,6 +13,20 @@ App Android nativo de listagem de filmes usando a API do TMDB.
 
 > Bearer token (não a API key v3): obtenha em https://www.themoviedb.org/settings/api
 
+## Qualidade de código
+
+Detekt + ktlint configurados. Rodar antes de commit:
+
+```bash
+./gradlew detekt          # análise estática (Compose-aware via compose-rules)
+./gradlew ktlintCheck     # formatação
+./gradlew ktlintFormat    # auto-fix formatação
+./gradlew test            # testes unitários
+./gradlew check           # todos acima
+```
+
+Config Detekt em `config/detekt/detekt.yml`. Inclui regras Compose via `io.nlopez.compose.rules:detekt`.
+
 ## Telas
 
 | Home | Detalhe |
