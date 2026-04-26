@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 data class MovieFilterChip<T>(
@@ -63,4 +65,21 @@ object FilterChipRowTestTags {
     const val root = "filter_chip_row"
 
     fun chip(label: String) = "filter_chip_$label"
+}
+
+@ThemePreviews
+@Composable
+private fun FilterChipRowPreview() {
+    IfoodMoviesTheme {
+        FilterChipRow(
+            chips = listOf(
+                MovieFilterChip(key = "popular", label = "Popular"),
+                MovieFilterChip(key = "favorites", label = "Favoritos · 3"),
+                MovieFilterChip(key = "now", label = "Mais Recentes"),
+                MovieFilterChip(key = "action", label = "Ação"),
+            ),
+            selected = "popular",
+            onSelect = {},
+        )
+    }
 }

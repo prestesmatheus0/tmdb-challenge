@@ -50,8 +50,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.ifood.challenge.movies.core.designsystem.component.ErrorState
+import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
 import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
+import com.ifood.challenge.movies.core.network.BackdropSize
+import com.ifood.challenge.movies.core.network.PosterSize
+import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.core.designsystem.component.ErrorVariant
 import com.ifood.challenge.movies.core.designsystem.component.ShimmerBox
 import com.ifood.challenge.movies.core.network.ImageUrlBuilder
@@ -346,5 +351,65 @@ private fun DetailSkeleton() {
                 )
             }
         }
+    }
+}
+
+private val PREVIEW_DETAIL = MovieDetail(
+    id = 27205,
+    title = "Inception",
+    posterPath = null,
+    backdropPath = null,
+    overview = "Dom Cobb é um ladrão habilidoso na perigosa arte de extrair segredos do subconsciente.",
+    voteAverage = 8.8,
+    releaseDate = "2010-07-16",
+    runtimeMinutes = 148,
+    tagline = "Sua mente é o palco do crime",
+    genres = listOf(Genre(28, "Ação"), Genre(878, "Ficção Científica")),
+)
+
+private val PREVIEW_IMAGE_BUILDER = object : ImageUrlBuilder {
+    override fun poster(path: String?, size: PosterSize) = ""
+    override fun backdrop(path: String?, size: BackdropSize) = ""
+}
+
+@ThemePreviews
+@Composable
+private fun DetailScreenLoadingPreview() {
+    IfoodMoviesTheme {
+        DetailScreen(
+            uiState = DetailUiState.Loading,
+            onBack = {},
+            onFavoriteToggle = {},
+            onRetry = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun DetailScreenErrorPreview() {
+    IfoodMoviesTheme {
+        DetailScreen(
+            uiState = DetailUiState.Error,
+            onBack = {},
+            onFavoriteToggle = {},
+            onRetry = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun DetailScreenSuccessPreview() {
+    IfoodMoviesTheme {
+        DetailScreen(
+            uiState = DetailUiState.Success(PREVIEW_DETAIL, isFavorite = false),
+            onBack = {},
+            onFavoriteToggle = {},
+            onRetry = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
     }
 }

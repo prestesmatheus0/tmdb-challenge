@@ -16,10 +16,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
 import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 @Composable
@@ -75,4 +79,16 @@ object EmptyStateTestTags {
     const val default = "empty_state"
     const val favoritesEmpty = "empty_state_favorites"
     const val searchEmpty = "empty_state_search"
+}
+
+@ThemePreviews
+@Composable
+private fun EmptyStatePreview() {
+    IfoodMoviesTheme {
+        EmptyState(
+            icon = Icons.Filled.Movie,
+            title = "Nenhum favorito ainda",
+            description = "Favorite filmes para vê-los aqui",
+        )
+    }
 }

@@ -18,7 +18,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ifood.challenge.movies.core.designsystem.R
+import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
 import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 @Composable
@@ -49,4 +51,12 @@ fun OfflineBanner(modifier: Modifier = Modifier) {
 
 object OfflineBannerTestTags {
     const val root = "offline_banner"
+}
+
+@ThemePreviews
+@Composable
+private fun OfflineBannerPreview() {
+    IfoodMoviesTheme {
+        OfflineBanner()
+    }
 }

@@ -45,8 +45,16 @@ import com.ifood.challenge.movies.core.designsystem.component.MovieCard
 import com.ifood.challenge.movies.core.designsystem.component.MovieCardSkeleton
 import com.ifood.challenge.movies.core.designsystem.component.MovieFilterChip
 import com.ifood.challenge.movies.core.designsystem.component.OfflineBanner
+import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
+import com.ifood.challenge.movies.core.network.BackdropSize
+import com.ifood.challenge.movies.core.network.PosterSize
+import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
+import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
+import kotlinx.coroutines.flow.flowOf
 import org.koin.compose.koinInject
 import com.ifood.challenge.movies.core.network.ImageUrlBuilder
 
@@ -299,5 +307,89 @@ private fun SkeletonGrid() {
         modifier = Modifier.fillMaxSize(),
     ) {
         items(6) { MovieCardSkeleton() }
+    }
+}
+
+private val PREVIEW_GENRES = listOf(
+    Genre(28, "Ação"),
+    Genre(12, "Aventura"),
+    Genre(16, "Animação"),
+)
+
+private val PREVIEW_MOVIE = Movie(
+    id = 1,
+    title = "Inception",
+    posterPath = null,
+    backdropPath = null,
+    overview = "",
+    voteAverage = 8.8,
+    releaseDate = "2010-07-16",
+    popularity = 100.0,
+)
+
+private val PREVIEW_IMAGE_BUILDER = object : ImageUrlBuilder {
+    override fun poster(path: String?, size: PosterSize) = ""
+    override fun backdrop(path: String?, size: BackdropSize) = ""
+}
+
+@ThemePreviews
+@Composable
+private fun HomeScreenEmptyPreview() {
+    IfoodMoviesTheme {
+        val movies = flowOf(PagingData.empty<Movie>()).collectAsLazyPagingItems()
+        HomeScreen(
+            uiState = HomeUiState(genres = PREVIEW_GENRES),
+            movies = movies,
+            onMovieClick = {},
+            onFilterSelect = {},
+            onSearchQueryChange = {},
+            onSearchToggle = {},
+            onFavoriteToggle = {},
+            onShuffle = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun HomeScreenFavoritesPreview() {
+    IfoodMoviesTheme {
+        val movies = flowOf(PagingData.empty<Movie>()).collectAsLazyPagingItems()
+        HomeScreen(
+            uiState = HomeUiState(
+                filter = HomeFilter.Favorites,
+                favoriteIds = setOf(1),
+                favoriteMovies = listOf(PREVIEW_MOVIE),
+                genres = PREVIEW_GENRES,
+            ),
+            movies = movies,
+            onMovieClick = {},
+            onFilterSelect = {},
+            onSearchQueryChange = {},
+            onSearchToggle = {},
+            onFavoriteToggle = {},
+            onShuffle = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun HomeScreenOfflinePreview() {
+    IfoodMoviesTheme {
+        val movies = flowOf(PagingData.empty<Movie>()).collectAsLazyPagingItems()
+        HomeScreen(
+            uiState = HomeUiState(isOffline = true, genres = PREVIEW_GENRES),
+            movies = movies,
+            onMovieClick = {},
+            onFilterSelect = {},
+            onSearchQueryChange = {},
+            onSearchToggle = {},
+            onFavoriteToggle = {},
+            onShuffle = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
     }
 }

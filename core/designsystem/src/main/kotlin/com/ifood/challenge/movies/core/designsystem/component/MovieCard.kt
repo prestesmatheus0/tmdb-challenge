@@ -30,9 +30,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.ifood.challenge.movies.core.designsystem.R
 import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.MotionTokens
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
@@ -191,4 +197,28 @@ object MovieCardTestTags {
     fun root(title: String) = "movie_card_$title"
 
     fun favorite(title: String) = "movie_card_favorite_$title"
+}
+
+private class FavoriteParam : PreviewParameterProvider<Boolean> {
+    override val values = sequenceOf(false, true)
+}
+
+@ThemePreviews
+@Composable
+private fun MovieCardPreview(
+    @PreviewParameter(FavoriteParam::class) isFavorite: Boolean,
+) {
+    IfoodMoviesTheme {
+        Box(modifier = Modifier.padding(MaterialTheme.spacing.md)) {
+            MovieCard(
+                title = "Inception",
+                posterUrl = null,
+                rating = 8.8,
+                isFavorite = isFavorite,
+                onClick = {},
+                onFavoriteToggle = {},
+                modifier = Modifier.width(180.dp),
+            )
+        }
+    }
 }

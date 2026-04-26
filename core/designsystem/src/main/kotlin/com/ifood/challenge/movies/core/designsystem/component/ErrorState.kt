@@ -26,9 +26,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.ifood.challenge.movies.core.designsystem.R
+import com.ifood.challenge.movies.core.designsystem.preview.ThemePreviews
 import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 enum class ErrorVariant { Network, Generic, Timeout, Server }
@@ -128,4 +132,18 @@ object ErrorStateTestTags {
     const val retry = "error_state_retry"
 
     fun forVariant(variant: ErrorVariant) = "error_state_${variant.name.lowercase()}"
+}
+
+private class ErrorVariantParam : PreviewParameterProvider<ErrorVariant> {
+    override val values = ErrorVariant.values().asSequence()
+}
+
+@ThemePreviews
+@Composable
+private fun ErrorStatePreview(
+    @PreviewParameter(ErrorVariantParam::class) variant: ErrorVariant,
+) {
+    IfoodMoviesTheme {
+        ErrorState(variant = variant, onRetry = {})
+    }
 }
