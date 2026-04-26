@@ -117,8 +117,16 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 |--------|-----------|
 | Domain | `MoviesRepositoryImpl`, `MovieMapper`, todos use cases (`UseCasesTest`) |
 | Data | `PagingSourceTest` (Now Playing, Discover, Search) |
-| Feature ViewModels | `HomeViewModel` (15 cenários), `DetailViewModel` (8 cenários) |
-| Compose UI | `HomeScreenTest`, `DetailScreenTest` (Robolectric + `createComposeRule`) |
+| Feature ViewModels | `HomeViewModel` (16 cenários), `DetailViewModel` (8 cenários) |
+| Compose UI (JVM) | `HomeScreenTest`, `DetailScreenTest` (Robolectric + `createComposeRule`) |
+| Designsystem | `MovieCard`, `FilterChipRow`, `EmptyState`, `ErrorState`, `OfflineBanner` |
+| Navigation | rotas type-safe, round-trip serializável |
+| **E2E instrumentado** | `UserJourneyTest` (6 flows) + `ConfigChangeTest` (4 cenários de rotation/process death) — `app/src/androidTest/`, MockWebServer + Koin override + Room in-memory |
+
+**Rodar instrumentados** (precisa emulador conectado):
+```bash
+./gradlew :app:connectedDebugAndroidTest
+```
 
 **Padrão de fakes:** uso de `fun interface` permite criar fakes via lambda em vez de mocks. Exemplo:
 ```kotlin
