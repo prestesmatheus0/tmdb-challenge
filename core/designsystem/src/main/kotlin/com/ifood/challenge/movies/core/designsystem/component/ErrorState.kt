@@ -28,6 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ifood.challenge.movies.core.designsystem.R
+import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 enum class ErrorVariant { Network, Generic, Timeout, Server }
 
@@ -44,7 +46,7 @@ fun ErrorState(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(horizontal = 32.dp, vertical = 48.dp)
+                .padding(horizontal = MaterialTheme.spacing.xl, vertical = MaterialTheme.spacing.xxl)
                 .testTag(ErrorStateTestTags.forVariant(variant)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -52,7 +54,7 @@ fun ErrorState(
         Box(
             modifier =
                 Modifier
-                    .size(80.dp)
+                    .size(Dimens.CircleBackgroundLg)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.errorContainer),
             contentAlignment = Alignment.Center,
@@ -61,24 +63,24 @@ fun ErrorState(
                 imageVector = content.icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(Dimens.IconSizeLg),
             )
         }
-        Box(Modifier.size(16.dp))
+        Box(Modifier.size(MaterialTheme.spacing.md))
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
-        Box(Modifier.size(8.dp))
+        Box(Modifier.size(MaterialTheme.spacing.xs))
         Text(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        Box(Modifier.size(24.dp))
+        Box(Modifier.size(MaterialTheme.spacing.lg))
         Button(
             onClick = onRetry,
             modifier = Modifier.testTag(ErrorStateTestTags.retry),

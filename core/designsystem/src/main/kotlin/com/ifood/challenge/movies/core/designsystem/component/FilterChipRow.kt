@@ -9,12 +9,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 data class MovieFilterChip<T>(
     val key: T,
@@ -30,8 +32,8 @@ fun <T> FilterChipRow(
 ) {
     LazyRow(
         modifier = modifier.testTag(FilterChipRowTestTags.root),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xs),
     ) {
         items(chips, key = { it.label }) { chip ->
             val isSelected = chip.key == selected

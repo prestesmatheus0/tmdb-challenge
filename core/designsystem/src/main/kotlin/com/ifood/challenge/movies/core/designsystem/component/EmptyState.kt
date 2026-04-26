@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 @Composable
 fun EmptyState(
@@ -32,7 +34,7 @@ fun EmptyState(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(horizontal = 32.dp, vertical = 48.dp)
+                .padding(horizontal = MaterialTheme.spacing.xl, vertical = MaterialTheme.spacing.xxl)
                 .testTag(testTag),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -40,7 +42,7 @@ fun EmptyState(
         Box(
             modifier =
                 Modifier
-                    .size(80.dp)
+                    .size(Dimens.CircleBackgroundLg)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh),
             contentAlignment = Alignment.Center,
@@ -49,17 +51,17 @@ fun EmptyState(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(Dimens.IconSizeLg),
             )
         }
-        Box(Modifier.size(16.dp))
+        Box(Modifier.size(MaterialTheme.spacing.md))
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
-        Box(Modifier.size(8.dp))
+        Box(Modifier.size(MaterialTheme.spacing.xs))
         Text(
             text = description,
             style = MaterialTheme.typography.bodyMedium,

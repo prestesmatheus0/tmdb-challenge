@@ -50,6 +50,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.ifood.challenge.movies.core.designsystem.component.ErrorState
+import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
 import com.ifood.challenge.movies.core.designsystem.component.ErrorVariant
 import com.ifood.challenge.movies.core.designsystem.component.ShimmerBox
 import com.ifood.challenge.movies.core.network.ImageUrlBuilder
@@ -68,7 +70,7 @@ internal fun DetailScreen(
 ) {
     val scrollState = rememberScrollState()
     val density = LocalDensity.current
-    val collapseThresholdPx = remember(density) { with(density) { 300.dp.toPx() } }
+    val collapseThresholdPx = remember(density) { with(density) { (Dimens.HeroImageHeight - 60.dp).toPx() } }
     val collapseAlpha by remember(scrollState) {
         derivedStateOf { (scrollState.value / collapseThresholdPx).coerceIn(0f, 1f) }
     }
@@ -118,14 +120,14 @@ private fun CollapsingTopBar(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = collapseAlpha))
             .statusBarsPadding()
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .padding(horizontal = MaterialTheme.spacing.xs, vertical = MaterialTheme.spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         IconButton(
             onClick = onBack,
             modifier = Modifier
-                .size(48.dp)
+                .size(Dimens.IconButtonSize)
                 .clip(CircleShape)
                 .background(Color.Black.copy(alpha = circleAlpha)),
         ) {
@@ -144,7 +146,7 @@ private fun CollapsingTopBar(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = MaterialTheme.spacing.xs)
                 .alpha(collapseAlpha),
         )
 
@@ -152,7 +154,7 @@ private fun CollapsingTopBar(
             IconButton(
                 onClick = onFavoriteToggle,
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(Dimens.IconButtonSize)
                     .clip(CircleShape)
                     .background(Color.Black.copy(alpha = circleAlpha)),
             ) {
@@ -165,7 +167,7 @@ private fun CollapsingTopBar(
                 )
             }
         } else {
-            Spacer(modifier = Modifier.size(48.dp))
+            Spacer(modifier = Modifier.size(Dimens.IconButtonSize))
         }
     }
 }
@@ -180,7 +182,7 @@ private fun DetailContent(
     scrollState: ScrollState,
 ) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
-        Box(modifier = Modifier.fillMaxWidth().height(360.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().height(Dimens.HeroImageHeight)) {
             AsyncImage(
                 model = imageUrlBuilder.poster(detail.posterPath),
                 contentDescription = null,
@@ -190,7 +192,7 @@ private fun DetailContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
+                    .height(Dimens.HeroGradientTopHeight)
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent),
@@ -201,7 +203,7 @@ private fun DetailContent(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(80.dp)
+                    .height(Dimens.HeroGradientBottomHeight)
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface),
@@ -213,8 +215,8 @@ private fun DetailContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 120.dp),
+                .padding(horizontal = MaterialTheme.spacing.lg)
+                .padding(bottom = Dimens.ContentBottomPadding),
         ) {
             Text(
                 text = detail.title,
@@ -223,7 +225,7 @@ private fun DetailContent(
 
             val tagline = detail.tagline
             if (!tagline.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.xxs))
                 Text(
                     text = tagline,
                     style = MaterialTheme.typography.bodyMedium,
@@ -231,11 +233,11 @@ private fun DetailContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.xs))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xs),
             ) {
                 detail.releaseDate?.take(4)?.let { year ->
                     Text(text = year, style = MaterialTheme.typography.bodyMedium)
@@ -252,7 +254,7 @@ private fun DetailContent(
                         imageVector = Icons.Default.Star,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(Dimens.IconSizeSm),
                     )
                     Text(
                         text = " ${"%.1f".format(detail.voteAverage)}",
@@ -262,8 +264,8 @@ private fun DetailContent(
             }
 
             if (detail.genres.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.sm))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xs)) {
                     detail.genres.forEach { genre ->
                         AssistChip(
                             onClick = {},
@@ -275,12 +277,12 @@ private fun DetailContent(
             }
 
             if (detail.overview.isNotBlank()) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.md))
                 Text(
                     text = stringResource(R.string.detail_synopsis),
                     style = MaterialTheme.typography.titleMedium,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.xs))
                 Text(
                     text = detail.overview,
                     style = MaterialTheme.typography.bodyMedium,
@@ -288,31 +290,31 @@ private fun DetailContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.lg))
 
             if (isFavorite) {
                 OutlinedButton(
                     onClick = onFavoriteToggle,
-                    shape = RoundedCornerShape(28.dp),
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(Dimens.ButtonCornerRadius),
+                    modifier = Modifier.fillMaxWidth().height(Dimens.ButtonHeight),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp),
+                        modifier = Modifier.padding(end = MaterialTheme.spacing.xs),
                     )
                     Text(stringResource(R.string.detail_remove_favorite))
                 }
             } else {
                 Button(
                     onClick = onFavoriteToggle,
-                    shape = RoundedCornerShape(28.dp),
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(Dimens.ButtonCornerRadius),
+                    modifier = Modifier.fillMaxWidth().height(Dimens.ButtonHeight),
                 ) {
                     Icon(
                         imageVector = Icons.Default.FavoriteBorder,
                         contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp),
+                        modifier = Modifier.padding(end = MaterialTheme.spacing.xs),
                     )
                     Text(stringResource(R.string.detail_add_favorite))
                 }
@@ -327,20 +329,20 @@ private fun DetailSkeleton() {
         ShimmerBox(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(360.dp),
+                .height(Dimens.HeroImageHeight),
         )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = MaterialTheme.spacing.lg, vertical = MaterialTheme.spacing.md),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
         ) {
             repeat(5) {
                 ShimmerBox(
                     modifier = Modifier
                         .fillMaxWidth(if (it == 0) 0.7f else 1f)
-                        .height(16.dp)
-                        .clip(RoundedCornerShape(4.dp)),
+                        .height(Dimens.SkeletonLineHeight)
+                        .clip(RoundedCornerShape(Dimens.SkeletonCornerRadius)),
                 )
             }
         }

@@ -45,6 +45,7 @@ import com.ifood.challenge.movies.core.designsystem.component.MovieCard
 import com.ifood.challenge.movies.core.designsystem.component.MovieCardSkeleton
 import com.ifood.challenge.movies.core.designsystem.component.MovieFilterChip
 import com.ifood.challenge.movies.core.designsystem.component.OfflineBanner
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import org.koin.compose.koinInject
 import com.ifood.challenge.movies.core.network.ImageUrlBuilder
@@ -115,7 +116,7 @@ internal fun HomeScreen(
                         onExpandedChange = {},
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .padding(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.xxs)
                             .testTag("home_search_bar"),
                         content = {},
                     )
@@ -190,9 +191,9 @@ private fun FavoritesContent(
     } else {
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
             modifier = Modifier.fillMaxSize(),
         ) {
             items(count = movies.size, key = { movies[it].id }) { index ->
@@ -254,9 +255,9 @@ private fun MovieGrid(
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
         modifier = Modifier.fillMaxSize(),
     ) {
         items(
@@ -292,9 +293,9 @@ private fun MovieGrid(
 private fun SkeletonGrid() {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
         modifier = Modifier.fillMaxSize(),
     ) {
         items(6) { MovieCardSkeleton() }

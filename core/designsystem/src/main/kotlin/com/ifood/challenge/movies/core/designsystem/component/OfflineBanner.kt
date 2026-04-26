@@ -18,6 +18,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ifood.challenge.movies.core.designsystem.R
+import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 @Composable
 fun OfflineBanner(modifier: Modifier = Modifier) {
@@ -26,16 +28,16 @@ fun OfflineBanner(modifier: Modifier = Modifier) {
             modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.tertiaryContainer)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.sm)
                 .testTag(OfflineBannerTestTags.root),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xs),
     ) {
         Icon(
             imageVector = Icons.Filled.CloudOff,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onTertiaryContainer,
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier.size(Dimens.IconSizeMd),
         )
         Text(
             text = stringResource(R.string.offline_banner_message),

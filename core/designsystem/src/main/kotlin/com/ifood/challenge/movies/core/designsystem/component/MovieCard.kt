@@ -39,7 +39,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.ifood.challenge.movies.core.designsystem.R
+import com.ifood.challenge.movies.core.designsystem.theme.Dimens
 import com.ifood.challenge.movies.core.designsystem.theme.MotionTokens
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 @Composable
 fun MovieCard(
@@ -86,13 +88,13 @@ fun MovieCard(
                     modifier =
                         Modifier
                             .align(Alignment.TopEnd)
-                            .padding(8.dp),
+                            .padding(MaterialTheme.spacing.xs),
                 )
             }
 
             Column(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.sm, vertical = MaterialTheme.spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xxs),
             ) {
                 Text(
                     text = title,
@@ -141,7 +143,7 @@ private fun FavoriteButton(
         onClick = onToggle,
         modifier =
             modifier
-                .size(40.dp)
+                .size(Dimens.FavoriteButtonSize)
                 .clip(MaterialTheme.shapes.extraLarge)
                 .background(Color.Black.copy(alpha = 0.35f))
                 .scale(scale.value)
@@ -169,13 +171,13 @@ private fun FavoriteButton(
 private fun RatingRow(rating: Double) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xxs),
     ) {
         Icon(
             imageVector = Icons.Filled.Star,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(14.dp),
+            modifier = Modifier.size(Dimens.IconSizeXs),
         )
         Text(
             text = "%.1f".format(rating),
