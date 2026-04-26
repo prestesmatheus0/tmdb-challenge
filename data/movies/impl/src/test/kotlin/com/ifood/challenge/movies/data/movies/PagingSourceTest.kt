@@ -7,6 +7,7 @@ import com.ifood.challenge.movies.data.movies.internal.api.dto.MovieDto
 import com.ifood.challenge.movies.data.movies.internal.api.dto.MovieListResponseDto
 import com.ifood.challenge.movies.data.movies.internal.paging.DiscoverPagingSource
 import com.ifood.challenge.movies.data.movies.internal.paging.NowPlayingPagingSource
+import com.ifood.challenge.movies.data.movies.internal.paging.SearchPagingSource
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -122,6 +123,41 @@ class PagingSourceTest {
         assertEquals(42, movie.id)
         assertEquals("Toy Story", movie.title)
         assertEquals(8.3, movie.voteAverage)
+    }
+
+    // ── SearchPagingSource ──
+
+    @Test
+    fun search_firstPage_returnsPrevKeyNull() = runTest {
+        coEvery { apiService.searchMovies(query = "inception", page = 1) } returns makeResponse(page = 1, totalPages = 4)
+
+        val source = SearchPagingSource(apiService, query = "inception")
+        val result = source.load(LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
+
+        assertIs<LoadResult.Page<Int, *>>(result)
+        assertNull(result.prevKey)
+        assertEquals(2, result.nextKey)
+    }
+
+    @Test
+    fun search_lastPage_returnsNextKeyNull() = runTest {
+        coEvery { apiService.searchMovies(query = "rare", page = 1) } returns makeResponse(page = 1, totalPages = 1)
+
+        val source = SearchPagingSource(apiService, query = "rare")
+        val result = source.load(LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
+
+        assertIs<LoadResult.Page<Int, *>>(result)
+        assertNull(result.nextKey)
+    }
+
+    @Test
+    fun search_onApiError_returnsLoadResultError() = runTest {
+        coEvery { apiService.searchMovies(query = any(), page = any()) } throws RuntimeException("network")
+
+        val source = SearchPagingSource(apiService, query = "x")
+        val result = source.load(LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
+
+        assertIs<LoadResult.Error<Int, *>>(result)
     }
 
     private fun makeResponse(page: Int, totalPages: Int) = MovieListResponseDto(

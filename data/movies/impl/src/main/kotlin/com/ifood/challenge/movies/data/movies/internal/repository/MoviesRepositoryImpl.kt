@@ -16,6 +16,7 @@ import com.ifood.challenge.movies.data.movies.internal.mapper.toFavoriteEntity
 import com.ifood.challenge.movies.data.movies.internal.paging.DiscoverPagingSource
 import com.ifood.challenge.movies.data.movies.internal.paging.MoviesRemoteMediator
 import com.ifood.challenge.movies.data.movies.internal.paging.NowPlayingPagingSource
+import com.ifood.challenge.movies.data.movies.internal.paging.SearchPagingSource
 import com.ifood.challenge.movies.core.common.coroutines.DispatcherProvider
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
@@ -59,14 +60,8 @@ internal class MoviesRepositoryImpl(
     override fun searchPagingFlow(query: String): Flow<PagingData<Movie>> =
         Pager(
             config = PagingConfig(pageSize = PAGE_SIZE, enablePlaceholders = false),
-            pagingSourceFactory = { movieDao.searchPagingSource(escapeLikePattern(query)) },
-        ).flow.map { pagingData -> pagingData.map { it.toDomain() } }
-
-    private fun escapeLikePattern(input: String): String =
-        input
-            .replace("\\", "\\\\")
-            .replace("%", "\\%")
-            .replace("_", "\\_")
+            pagingSourceFactory = { SearchPagingSource(apiService, query) },
+        ).flow
 
     override fun observeDetail(movieId: Int): Flow<MovieDetail?> =
         movieDetailDao.observe(movieId).map { it?.toDomain() }

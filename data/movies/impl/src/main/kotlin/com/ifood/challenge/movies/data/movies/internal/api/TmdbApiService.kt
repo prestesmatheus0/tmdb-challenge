@@ -23,6 +23,12 @@ internal interface TmdbApiService {
     @GET("movie/{id}")
     suspend fun movieDetail(@Path("id") movieId: Int): MovieDetailDto
 
+    @GET("search/movie")
+    suspend fun searchMovies(
+        @Query("query") query: String,
+        @Query("page") page: Int,
+    ): MovieListResponseDto
+
     @GET("genre/movie/list")
     suspend fun genres(): GenreListResponseDto
 }

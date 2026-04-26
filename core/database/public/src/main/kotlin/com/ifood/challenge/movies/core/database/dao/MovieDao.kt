@@ -12,9 +12,6 @@ interface MovieDao {
     @Query("SELECT * FROM movies ORDER BY page ASC, popularity DESC")
     fun pagingSource(): PagingSource<Int, MovieEntity>
 
-    @Query("SELECT * FROM movies WHERE title LIKE '%' || :query || '%' ESCAPE '\\' ORDER BY popularity DESC")
-    fun searchPagingSource(query: String): PagingSource<Int, MovieEntity>
-
     @Query("SELECT * FROM movies WHERE id = :id LIMIT 1")
     fun observeById(id: Int): Flow<MovieEntity?>
 
