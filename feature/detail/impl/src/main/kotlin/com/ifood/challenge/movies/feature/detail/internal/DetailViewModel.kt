@@ -1,5 +1,6 @@
 package com.ifood.challenge.movies.feature.detail.internal
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ifood.challenge.movies.domain.movies.model.Movie
@@ -15,12 +16,20 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 internal class DetailViewModel(
-    private val movieId: Int,
+    savedStateHandle: SavedStateHandle,
     private val fetchDetail: FetchMovieDetailUseCase,
     observeDetail: GetMovieDetailUseCase,
     observeIsFavorite: GetIsFavoriteUseCase,
     private val setFavorite: SetFavoriteUseCase,
 ) : ViewModel() {
+
+    private val movieId: Int = requireNotNull(savedStateHandle[KEY_MOVIE_ID]) {
+        "DetailViewModel requires '$KEY_MOVIE_ID' in SavedStateHandle"
+    }
+
+    private companion object {
+        const val KEY_MOVIE_ID = "movieId"
+    }
 
     private val isFetching = MutableStateFlow(true)
     private val fetchFailed = MutableStateFlow(false)
