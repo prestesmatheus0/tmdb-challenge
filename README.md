@@ -27,6 +27,17 @@ Detekt + ktlint configurados. Rodar antes de commit:
 
 Config Detekt em `config/detekt/detekt.yml`. Inclui regras Compose via `io.nlopez.compose.rules:detekt`.
 
+## CI
+
+GitHub Actions em `.github/workflows/ci.yml`. Roda em cada PR + push para `main`:
+1. ktlint
+2. detekt
+3. testes unitários (release variant)
+4. assemble APK (com `secrets.TMDB_API_KEY`)
+5. upload de relatórios (test + detekt) como artifacts
+
+Cache do Gradle compartilhado entre runs. PR não escreve no cache (read-only).
+
 ## Telas
 
 | Home | Detalhe |
