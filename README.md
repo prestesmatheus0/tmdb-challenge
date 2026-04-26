@@ -40,12 +40,17 @@ app/
 │   ├── public/       ← MoviesRepository (interface), UseCases (fun interface), Models
 │   └── impl/         ← UseCaseImpl, DomainMoviesKoinModule
 ├── data/movies/
-│   └── impl/         ← MoviesRepositoryImpl, RemoteMediator, PagingSource, Mapper
+│   ├── public/       ← MoviesDataModule (Koin)
+│   └── impl/         ← MoviesRepositoryImpl, RemoteMediator, PagingSources, Mapper
 ├── core/
-│   ├── common/       ← DispatcherProvider, ConnectivityObserver, DomainResult
-│   ├── database/     ← Room DAOs, Entities, MoviesDatabase
-│   ├── designsystem/ ← Tema M3, MovieCard, FilterChipRow, ErrorState, EmptyState…
-│   └── network/      ← Retrofit, AuthInterceptor, ImageUrlBuilder
+│   ├── common/       ← DispatcherProvider, ConnectivityObserver
+│   ├── database/
+│   │   └── impl/     ← Room DAOs, Entities, MoviesDatabase (encapsulado)
+│   ├── designsystem/ ← Tema M3, Spacing/Dimens tokens, MovieCard, FilterChipRow, ErrorState…
+│   ├── network/
+│   │   ├── public/   ← ImageUrlBuilder
+│   │   └── impl/     ← Retrofit, AuthInterceptor
+│   └── testing/      ← MainDispatcherRule, TestDispatcherProvider
 ```
 
 **Padrão public/impl:** cada módulo expõe apenas interfaces e modelos via `:public`; a implementação fica em `:impl` e não vaza dependências de framework.
@@ -64,6 +69,12 @@ app/
 | Async | Coroutines + StateFlow |
 | Conectividade | ConnectivityManager + NetworkCallback |
 
+## Design tokens
+
+Strings em `res/values/strings.xml` por módulo (i18n-ready).
+Spacing semântico (`xxs..xxxl`) em `core/designsystem/theme/Spacing.kt` exposto via `MaterialTheme.spacing.xs`.
+Dimens fixos (alturas, ícones, raios) em `Dimens` object.
+
 ## Offline-first
 
 Filmes populares são armazenados no Room via `RemoteMediator`. Ao abrir sem internet, o app exibe o cache local. O banner de offline aparece automaticamente via `NET_CAPABILITY_VALIDATED`.
@@ -77,4 +88,16 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
   ./gradlew test
 ```
 
-Cobertura: `DomainResult`, `MovieMapper`, `MoviesRepositoryImpl`, use cases de domínio.
+| Camada | Cobertura |
+|--------|-----------|
+| Domain | `MoviesRepositoryImpl`, `MovieMapper`, todos use cases (`UseCasesTest`) |
+| Data | `PagingSourceTest` (Now Playing, Discover, Search) |
+| Feature ViewModels | `HomeViewModel` (15 cenários), `DetailViewModel` (8 cenários) |
+| Compose UI | `HomeScreenTest`, `DetailScreenTest` (Robolectric + `createComposeRule`) |
+
+**Padrão de fakes:** uso de `fun interface` permite criar fakes via lambda em vez de mocks. Exemplo:
+```kotlin
+val getPopular = GetPopularMoviesUseCase { emptyFlow() }
+```
+
+ViewModels usam `MainDispatcherRule` (`UnconfinedTestDispatcher`) para controle de coroutines em testes.
