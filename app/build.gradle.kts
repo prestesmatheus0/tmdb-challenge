@@ -100,4 +100,10 @@ dependencies {
 
     testImplementation(libs.androidx.navigation.testing)
     testImplementation(libs.kotlinx.serialization.json)
+
+    androidTestImplementation(libs.koin.test)
+    androidTestImplementation(libs.koin.test.junit4)
+    androidTestImplementation(libs.okhttp.mockwebserver)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.kotlinx.serialization.json)
 }
