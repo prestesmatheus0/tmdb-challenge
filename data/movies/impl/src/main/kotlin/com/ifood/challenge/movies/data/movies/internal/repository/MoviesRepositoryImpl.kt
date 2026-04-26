@@ -78,20 +78,7 @@ internal class MoviesRepositoryImpl(
         favoriteDao.observeAll().map { list -> list.map { it.movieId }.toSet() }
 
     override fun observeFavoriteMovies(): Flow<List<Movie>> =
-        favoriteDao.observeAll().map { list ->
-            list.map { entity ->
-                Movie(
-                    id = entity.movieId,
-                    title = entity.title,
-                    posterPath = entity.posterPath,
-                    backdropPath = null,
-                    overview = "",
-                    voteAverage = entity.voteAverage,
-                    releaseDate = null,
-                    popularity = 0.0,
-                )
-            }
-        }
+        favoriteDao.observeAll().map { list -> list.map { it.toDomain() } }
 
     override suspend fun fetchGenres(): List<Genre> = withContext(dispatchers.io) {
         apiService.genres().genres.map { it.toDomain() }

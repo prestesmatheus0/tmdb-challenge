@@ -18,7 +18,7 @@ import com.ifood.challenge.movies.core.database.entity.RemoteKeyEntity
         FavoriteEntity::class,
         RemoteKeyEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class MoviesDatabase : RoomDatabase() {
