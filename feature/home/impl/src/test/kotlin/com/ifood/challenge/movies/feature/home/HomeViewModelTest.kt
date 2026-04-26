@@ -1,5 +1,6 @@
 package com.ifood.challenge.movies.feature.home
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.paging.PagingData
 import com.ifood.challenge.movies.core.common.network.ConnectivityObserver
 import com.ifood.challenge.movies.core.common.network.NetworkStatus
@@ -42,7 +43,8 @@ class HomeViewModelTest {
     private var genresResult: Result<List<Genre>> = Result.success(TEST_GENRES)
     private val setFavoriteCalls = mutableListOf<Pair<Movie, Boolean>>()
 
-    private fun createViewModel() = HomeViewModel(
+    private fun createViewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) = HomeViewModel(
+        savedStateHandle = savedStateHandle,
         getPopularMovies = GetPopularMoviesUseCase { emptyFlow() },
         getNowPlayingMovies = GetNowPlayingMoviesUseCase { emptyFlow() },
         getMoviesByGenre = GetMoviesByGenreUseCase { emptyFlow() },
@@ -283,6 +285,36 @@ class HomeViewModelTest {
         viewModel.onShuffle()
 
         assertEquals(null, emittedId)
+    }
+
+    @Test
+    fun savedStateHandle_persistsSearchAndFilter() = runTest {
+        val viewModel = createViewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.collect()
+        }
+
+        viewModel.onFilterSelect(HomeFilter.Genre(28))
+        viewModel.onSearchToggle()
+        viewModel.onSearchQueryChange("inception")
+
+        // simulate process recreation: same SavedStateHandle, new ViewModel instance
+        val handle = SavedStateHandle().apply {
+            this["home_search_query"] = "inception"
+            this["home_search_active"] = true
+            this["home_filter_type"] = "genre"
+            this["home_filter_genre_id"] = 28
+        }
+        val restored = createViewModel(handle)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            restored.uiState.collect()
+        }
+
+        assertEquals("inception", restored.uiState.value.searchQuery)
+        assertTrue(restored.uiState.value.isSearchActive)
+        val filter = restored.uiState.value.filter
+        assertIs<HomeFilter.Genre>(filter)
+        assertEquals(28, filter.genreId)
     }
 
     companion object {

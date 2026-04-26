@@ -1,5 +1,6 @@
 package com.ifood.challenge.movies.feature.home.internal
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -33,6 +34,7 @@ private const val SEARCH_MIN_LENGTH = 2
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class HomeViewModel(
+    private val savedStateHandle: SavedStateHandle,
     private val getPopularMovies: GetPopularMoviesUseCase,
     private val getNowPlayingMovies: GetNowPlayingMoviesUseCase,
     private val getMoviesByGenre: GetMoviesByGenreUseCase,
@@ -44,7 +46,13 @@ internal class HomeViewModel(
     connectivityObserver: ConnectivityObserver,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState())
+    private val _uiState = MutableStateFlow(
+        HomeUiState(
+            searchQuery = savedStateHandle[KEY_SEARCH_QUERY] ?: "",
+            isSearchActive = savedStateHandle[KEY_SEARCH_ACTIVE] ?: false,
+            filter = decodeFilter(savedStateHandle),
+        ),
+    )
     val uiState = _uiState.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -95,6 +103,10 @@ internal class HomeViewModel(
                 filter = if (it.filter is HomeFilter.Favorites) HomeFilter.Popular else it.filter,
             )
         }
+        savedStateHandle[KEY_SEARCH_QUERY] = query
+        if (_uiState.value.filter is HomeFilter.Popular) {
+            persistFilter(HomeFilter.Popular)
+        }
     }
 
     fun onSearchToggle() {
@@ -108,12 +120,18 @@ internal class HomeViewModel(
                 )
             }
         }
+        savedStateHandle[KEY_SEARCH_ACTIVE] = _uiState.value.isSearchActive
+        savedStateHandle[KEY_SEARCH_QUERY] = _uiState.value.searchQuery
+        persistFilter(_uiState.value.filter)
     }
 
     fun onFilterSelect(filter: HomeFilter) {
         _uiState.update {
             it.copy(filter = filter, searchQuery = "", isSearchActive = false)
         }
+        persistFilter(filter)
+        savedStateHandle[KEY_SEARCH_QUERY] = ""
+        savedStateHandle[KEY_SEARCH_ACTIVE] = false
     }
 
     fun onFavoriteToggle(movie: Movie) {
@@ -135,6 +153,35 @@ internal class HomeViewModel(
             runCatching { getGenres() }
                 .onSuccess { genres -> _uiState.update { it.copy(genres = genres, genresError = false) } }
                 .onFailure { _uiState.update { it.copy(genresError = true) } }
+        }
+    }
+
+    private fun persistFilter(filter: HomeFilter) {
+        savedStateHandle[KEY_FILTER_TYPE] = when (filter) {
+            HomeFilter.Popular -> FILTER_POPULAR
+            HomeFilter.NowPlaying -> FILTER_NOW_PLAYING
+            HomeFilter.Favorites -> FILTER_FAVORITES
+            is HomeFilter.Genre -> FILTER_GENRE
+        }
+        savedStateHandle[KEY_FILTER_GENRE_ID] = (filter as? HomeFilter.Genre)?.genreId ?: -1
+    }
+
+    private companion object {
+        const val KEY_SEARCH_QUERY = "home_search_query"
+        const val KEY_SEARCH_ACTIVE = "home_search_active"
+        const val KEY_FILTER_TYPE = "home_filter_type"
+        const val KEY_FILTER_GENRE_ID = "home_filter_genre_id"
+
+        const val FILTER_POPULAR = "popular"
+        const val FILTER_NOW_PLAYING = "now_playing"
+        const val FILTER_FAVORITES = "favorites"
+        const val FILTER_GENRE = "genre"
+
+        fun decodeFilter(handle: SavedStateHandle): HomeFilter = when (handle.get<String>(KEY_FILTER_TYPE)) {
+            FILTER_NOW_PLAYING -> HomeFilter.NowPlaying
+            FILTER_FAVORITES -> HomeFilter.Favorites
+            FILTER_GENRE -> HomeFilter.Genre(handle[KEY_FILTER_GENRE_ID] ?: 0)
+            else -> HomeFilter.Popular
         }
     }
 }
