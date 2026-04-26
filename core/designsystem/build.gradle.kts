@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.ifood.android.library)
     alias(libs.plugins.ifood.android.compose)
+    alias(libs.plugins.ifood.android.test)
 }
 
 android {
