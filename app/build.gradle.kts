@@ -82,7 +82,6 @@ dependencies {
     implementation(project(":core:network:impl"))
     implementation(project(":core:network:public"))
     implementation(project(":core:database:impl"))
-    implementation(project(":core:database:public"))
 
     implementation(project(":data:movies:impl"))
     implementation(project(":data:movies:public"))

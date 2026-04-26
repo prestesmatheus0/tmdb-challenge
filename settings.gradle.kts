@@ -29,7 +29,6 @@ include(":core:common")
 include(":core:designsystem")
 include(":core:network:public")
 include(":core:network:impl")
-include(":core:database:public")
 include(":core:database:impl")
 include(":core:testing")
 

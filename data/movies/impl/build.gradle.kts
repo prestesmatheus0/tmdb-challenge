@@ -16,7 +16,6 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:network:public"))
     implementation(project(":core:network:impl"))
-    implementation(project(":core:database:public"))
     implementation(project(":core:database:impl"))
 
     implementation(libs.retrofit.core)
