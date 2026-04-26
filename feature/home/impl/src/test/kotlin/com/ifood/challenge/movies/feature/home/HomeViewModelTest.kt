@@ -12,7 +12,7 @@ import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByGenreUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByQueryUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetNowPlayingMoviesUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetPopularMoviesUseCase
-import com.ifood.challenge.movies.domain.movies.usecase.ObserveFavoriteIdsUseCase
+import com.ifood.challenge.movies.domain.movies.usecase.GetFavoriteIdsUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
 import com.ifood.challenge.movies.feature.home.internal.HomeFilter
 import com.ifood.challenge.movies.feature.home.internal.HomeViewModel
@@ -52,7 +52,7 @@ class HomeViewModelTest {
             setFavoriteCalls.add(movie to isFavorite)
         },
         getFavoriteMovies = GetFavoriteMoviesUseCase { favoriteMoviesFlow },
-        observeFavoriteIds = ObserveFavoriteIdsUseCase { favoriteIdsFlow },
+        observeFavoriteIds = GetFavoriteIdsUseCase { favoriteIdsFlow },
         connectivityObserver = object : ConnectivityObserver {
             override fun observe() = connectivityFlow
         },

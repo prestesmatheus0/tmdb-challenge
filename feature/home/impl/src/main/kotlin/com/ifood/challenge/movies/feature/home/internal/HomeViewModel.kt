@@ -13,7 +13,7 @@ import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByGenreUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByQueryUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetNowPlayingMoviesUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetPopularMoviesUseCase
-import com.ifood.challenge.movies.domain.movies.usecase.ObserveFavoriteIdsUseCase
+import com.ifood.challenge.movies.domain.movies.usecase.GetFavoriteIdsUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -40,7 +40,7 @@ internal class HomeViewModel(
     private val getGenres: GetGenresUseCase,
     private val setFavorite: SetFavoriteUseCase,
     private val getFavoriteMovies: GetFavoriteMoviesUseCase,
-    observeFavoriteIds: ObserveFavoriteIdsUseCase,
+    observeFavoriteIds: GetFavoriteIdsUseCase,
     connectivityObserver: ConnectivityObserver,
 ) : ViewModel() {
 

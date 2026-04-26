@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 import com.ifood.challenge.movies.domain.movies.usecase.FetchMovieDetailUseCase
-import com.ifood.challenge.movies.domain.movies.usecase.ObserveIsFavoriteUseCase
-import com.ifood.challenge.movies.domain.movies.usecase.ObserveMovieDetailUseCase
+import com.ifood.challenge.movies.domain.movies.usecase.GetIsFavoriteUseCase
+import com.ifood.challenge.movies.domain.movies.usecase.GetMovieDetailUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,8 +17,8 @@ import kotlinx.coroutines.launch
 internal class DetailViewModel(
     private val movieId: Int,
     private val fetchDetail: FetchMovieDetailUseCase,
-    observeDetail: ObserveMovieDetailUseCase,
-    observeIsFavorite: ObserveIsFavoriteUseCase,
+    observeDetail: GetMovieDetailUseCase,
+    observeIsFavorite: GetIsFavoriteUseCase,
     private val setFavorite: SetFavoriteUseCase,
 ) : ViewModel() {
 

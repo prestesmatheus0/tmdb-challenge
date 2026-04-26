@@ -3,8 +3,8 @@ package com.ifood.challenge.movies.domain.movies
 import app.cash.turbine.test
 import com.ifood.challenge.movies.domain.movies.internal.FetchMovieDetailUseCaseImpl
 import com.ifood.challenge.movies.domain.movies.internal.GetGenresUseCaseImpl
-import com.ifood.challenge.movies.domain.movies.internal.ObserveIsFavoriteUseCaseImpl
-import com.ifood.challenge.movies.domain.movies.internal.ObserveMovieDetailUseCaseImpl
+import com.ifood.challenge.movies.domain.movies.internal.GetIsFavoriteUseCaseImpl
+import com.ifood.challenge.movies.domain.movies.internal.GetMovieDetailUseCaseImpl
 import com.ifood.challenge.movies.domain.movies.internal.SetFavoriteUseCaseImpl
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
@@ -42,10 +42,10 @@ class UseCasesTest {
         coVerify(exactly = 1) { repository.fetchGenres() }
     }
 
-    // ObserveMovieDetailUseCase
+    // GetMovieDetailUseCase
 
     @Test
-    fun `ObserveMovieDetailUseCase emite MovieDetail do repository`() = runTest {
+    fun `GetMovieDetailUseCase emite MovieDetail do repository`() = runTest {
         val detail = MovieDetail(
             id = 1, title = "Inception", posterPath = null, backdropPath = null,
             overview = "", voteAverage = 8.8, releaseDate = null,
@@ -53,17 +53,17 @@ class UseCasesTest {
         )
         every { repository.observeDetail(1) } returns flowOf(detail)
 
-        ObserveMovieDetailUseCaseImpl(repository)(1).test {
+        GetMovieDetailUseCaseImpl(repository)(1).test {
             assertEquals(detail, awaitItem())
             awaitComplete()
         }
     }
 
     @Test
-    fun `ObserveMovieDetailUseCase emite null quando sem cache`() = runTest {
+    fun `GetMovieDetailUseCase emite null quando sem cache`() = runTest {
         every { repository.observeDetail(99) } returns flowOf(null)
 
-        ObserveMovieDetailUseCaseImpl(repository)(99).test {
+        GetMovieDetailUseCaseImpl(repository)(99).test {
             assertEquals(null, awaitItem())
             awaitComplete()
         }
@@ -80,23 +80,23 @@ class UseCasesTest {
         coVerify(exactly = 1) { repository.fetchAndCacheDetail(1) }
     }
 
-    // ObserveIsFavoriteUseCase
+    // GetIsFavoriteUseCase
 
     @Test
-    fun `ObserveIsFavoriteUseCase emite true quando favorito`() = runTest {
+    fun `GetIsFavoriteUseCase emite true quando favorito`() = runTest {
         every { repository.observeIsFavorite(1) } returns flowOf(true)
 
-        ObserveIsFavoriteUseCaseImpl(repository)(1).test {
+        GetIsFavoriteUseCaseImpl(repository)(1).test {
             assertTrue(awaitItem())
             awaitComplete()
         }
     }
 
     @Test
-    fun `ObserveIsFavoriteUseCase emite false quando nao e favorito`() = runTest {
+    fun `GetIsFavoriteUseCase emite false quando nao e favorito`() = runTest {
         every { repository.observeIsFavorite(1) } returns flowOf(false)
 
-        ObserveIsFavoriteUseCaseImpl(repository)(1).test {
+        GetIsFavoriteUseCaseImpl(repository)(1).test {
             assertFalse(awaitItem())
             awaitComplete()
         }

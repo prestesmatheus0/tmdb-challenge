@@ -5,8 +5,8 @@ import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 import com.ifood.challenge.movies.domain.movies.usecase.FetchMovieDetailUseCase
-import com.ifood.challenge.movies.domain.movies.usecase.ObserveIsFavoriteUseCase
-import com.ifood.challenge.movies.domain.movies.usecase.ObserveMovieDetailUseCase
+import com.ifood.challenge.movies.domain.movies.usecase.GetIsFavoriteUseCase
+import com.ifood.challenge.movies.domain.movies.usecase.GetMovieDetailUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
 import com.ifood.challenge.movies.feature.detail.internal.DetailUiState
 import com.ifood.challenge.movies.feature.detail.internal.DetailViewModel
@@ -35,8 +35,8 @@ class DetailViewModelTest {
     private fun createViewModel(movieId: Int = MOVIE_ID) = DetailViewModel(
         movieId = movieId,
         fetchDetail = FetchMovieDetailUseCase { fetchResult.getOrThrow() },
-        observeDetail = ObserveMovieDetailUseCase { detailFlow },
-        observeIsFavorite = ObserveIsFavoriteUseCase { isFavoriteFlow },
+        observeDetail = GetMovieDetailUseCase { detailFlow },
+        observeIsFavorite = GetIsFavoriteUseCase { isFavoriteFlow },
         setFavorite = SetFavoriteUseCase { movie, isFavorite ->
             setFavoriteCalls.add(movie to isFavorite)
         },
