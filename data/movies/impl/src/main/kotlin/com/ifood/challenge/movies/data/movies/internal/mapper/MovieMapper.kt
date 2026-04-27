@@ -50,6 +50,7 @@ internal fun MovieDetailDto.toEntity(fetchedAt: Long = System.currentTimeMillis(
         releaseDate = releaseDate,
         runtimeMinutes = runtime,
         tagline = tagline,
+        popularity = popularity,
         genresCsv = genres.joinToString(",") { it.id.toString() + ":" + it.name },
         fetchedAt = fetchedAt,
     )
@@ -65,6 +66,7 @@ internal fun MovieDetailEntity.toDomain(): MovieDetail =
         releaseDate = releaseDate,
         runtimeMinutes = runtimeMinutes,
         tagline = tagline,
+        popularity = popularity,
         genres = parseGenresCsv(genresCsv),
     )
 

@@ -14,6 +14,7 @@ data class MovieDetailEntity(
     val releaseDate: String?,
     val runtimeMinutes: Int?,
     val tagline: String?,
+    val popularity: Double,
     val genresCsv: String,
     val fetchedAt: Long,
 )

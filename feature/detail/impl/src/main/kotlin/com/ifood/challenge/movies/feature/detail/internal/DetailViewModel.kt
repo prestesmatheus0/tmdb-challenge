@@ -9,6 +9,7 @@ import com.ifood.challenge.movies.domain.movies.usecase.FetchMovieDetailUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetIsFavoriteUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMovieDetailUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -62,14 +63,21 @@ internal class DetailViewModel(
         loadDetail()
     }
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private fun loadDetail() {
         viewModelScope.launch {
-            runCatching { fetchDetail(movieId) }
-                .onSuccess { isFetching.value = false }
-                .onFailure {
-                    isFetching.value = false
-                    fetchFailed.value = true
-                }
+            try {
+                fetchDetail(movieId)
+                isFetching.value = false
+            } catch (e: CancellationException) {
+                // Coroutine cooperative cancellation: must propagate, not treat as fetch failure.
+                throw e
+            } catch (e: Exception) {
+                // Any other failure (IO, HTTP, parse) collapses into "show error UI + allow retry".
+                // Specific exception types are re-thrown by retrofit/OkHttp; we map them all to UI state.
+                isFetching.value = false
+                fetchFailed.value = true
+            }
         }
     }
 
@@ -89,5 +97,5 @@ private fun MovieDetail.toMovie() = Movie(
     overview = overview,
     voteAverage = voteAverage,
     releaseDate = releaseDate,
-    popularity = 0.0,
+    popularity = popularity,
 )

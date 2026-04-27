@@ -2,7 +2,6 @@ package com.ifood.challenge.movies.infra
 
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ifood.challenge.movies.core.common.di.commonKoinModule
-import com.ifood.challenge.movies.core.database.di.databaseKoinModule
 import com.ifood.challenge.movies.core.network.di.networkKoinModule
 import com.ifood.challenge.movies.data.movies.di.dataMoviesKoinModule
 import com.ifood.challenge.movies.di.appKoinModule
@@ -17,8 +16,13 @@ import org.koin.core.context.stopKoin
 
 /**
  * Stops the production Koin graph started by [com.ifood.challenge.movies.IfoodMoviesApp]
- * and rebuilds it with overrides for [NetworkConfig] (→ MockWebServer) and
+ * and rebuilds it with test substitutes for [NetworkConfig] (→ MockWebServer) and
  * [MoviesDatabase] (→ in-memory Room).
+ *
+ * IMPORTANT: we do NOT load the production `databaseKoinModule` here, otherwise Koin
+ * raises `DefinitionOverrideException` at startup since both modules define `single<MoviesDatabase>`.
+ * The production `appKoinModule` defines `NetworkConfig`; we let the later [testNetworkModule]
+ * override it (Koin 4 allows override-by-order when modules are passed in sequence).
  *
  * Order with other rules: declare AFTER [MockWebServerRule] so its base URL is available.
  */
@@ -32,17 +36,17 @@ class AppKoinTestRule(
         startKoin {
             androidContext(InstrumentationRegistry.getInstrumentation().targetContext.applicationContext)
             modules(
-                appKoinModule,
                 commonKoinModule,
                 networkKoinModule,
-                databaseKoinModule,
                 dataMoviesKoinModule,
                 domainMoviesKoinModule,
                 homeKoinModule,
                 detailKoinModule,
-                // overrides MUST come last
-                testNetworkModule(mockWebServer.baseUrl),
+                // Replacements (NOT alongside) for production database + appKoinModule's NetworkConfig.
+                // appKoinModule defines NetworkConfig; the testNetworkModule that follows overrides it.
                 testDatabaseModule(),
+                appKoinModule,
+                testNetworkModule(mockWebServer.baseUrl),
             )
         }
     }

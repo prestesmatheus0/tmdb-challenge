@@ -63,6 +63,7 @@ class UseCasesTest {
             id = 1, title = "Inception", posterPath = null, backdropPath = null,
             overview = "", voteAverage = 8.8, releaseDate = null,
             runtimeMinutes = 148, tagline = null, genres = emptyList(),
+            popularity = 0.0,
         )
         every { repository.observeDetail(1) } returns flowOf(detail)
 

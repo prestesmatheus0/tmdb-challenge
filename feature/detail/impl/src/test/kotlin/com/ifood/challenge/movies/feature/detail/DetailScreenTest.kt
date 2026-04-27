@@ -156,6 +156,7 @@ class DetailScreenTest {
             releaseDate = "2010-07-16",
             runtimeMinutes = 148,
             tagline = "Your mind is the scene of the crime",
+            popularity = 0.0,
             genres = listOf(Genre(28, "Action"), Genre(878, "Sci-Fi")),
         )
     }

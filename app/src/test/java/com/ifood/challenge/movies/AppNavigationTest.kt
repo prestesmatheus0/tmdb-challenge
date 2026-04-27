@@ -4,7 +4,7 @@ import com.ifood.challenge.movies.feature.detail.DetailRoute
 import com.ifood.challenge.movies.feature.home.HomeRoute
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertSame
 import org.junit.Test
 
 /**
@@ -14,10 +14,13 @@ import org.junit.Test
  */
 class AppNavigationTest {
     @Test
-    fun homeRoute_isSingletonObject() {
-        // HomeRoute has no args, must remain stable across navigation
-        assertNotNull(HomeRoute)
-        assertEquals(HomeRoute, HomeRoute)
+    fun homeRoute_isSerializableSingleton() {
+        // HomeRoute is `object` with no args. Round-trip must yield the same singleton instance,
+        // so two navigation pushes don't create distinct backstack entries.
+        val json = Json.encodeToString(HomeRoute.serializer(), HomeRoute)
+        val decoded = Json.decodeFromString(HomeRoute.serializer(), json)
+        // Same Kotlin object identity (kotlin objects deserialize back to the singleton)
+        assertSame(HomeRoute, decoded)
     }
 
     @Test

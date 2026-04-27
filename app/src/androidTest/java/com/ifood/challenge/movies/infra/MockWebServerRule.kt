@@ -16,7 +16,9 @@ class MockWebServerRule : ExternalResource() {
     val server: MockWebServer = MockWebServer()
     val baseUrl: String get() = server.url("/").toString()
 
-    private val routes = mutableMapOf<String, () -> MockResponse>()
+    // Accessed from both the test thread (route()/routeError()) and OkHttp dispatcher thread.
+    // ConcurrentHashMap provides safe concurrent reads + writes without explicit synchronization.
+    private val routes = java.util.concurrent.ConcurrentHashMap<String, () -> MockResponse>()
     private val recordedPaths = mutableListOf<String>()
 
     /** Snapshot of every path the server has dispatched, in order. Reset per test. */

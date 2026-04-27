@@ -130,7 +130,7 @@ class MoviesRepositoryImplTest {
         val entity = MovieDetailEntity(
             id = 1, title = "Inception", posterPath = null, backdropPath = null,
             overview = "A thief", voteAverage = 8.8, releaseDate = "2010-07-16",
-            runtimeMinutes = 148, tagline = "Your mind is the scene", genresCsv = "",
+            runtimeMinutes = 148, tagline = "Your mind is the scene", popularity = 0.0, genresCsv = "",
             fetchedAt = 0L,
         )
         every { movieDetailDao.observe(1) } returns flowOf(entity)

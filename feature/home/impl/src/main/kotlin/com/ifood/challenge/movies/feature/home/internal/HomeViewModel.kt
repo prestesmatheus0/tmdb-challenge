@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -53,10 +54,13 @@ internal class HomeViewModel(
             filter = decodeFilter(savedStateHandle),
         ),
     )
+
+    // initialValue mirrors the SavedStateHandle-restored state so that recomposition
+    // immediately after process death sees the persisted filter/searchQuery, not the default.
     val uiState = _uiState.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = HomeUiState(),
+        initialValue = _uiState.value,
     )
 
     private val _shuffleEvent = MutableSharedFlow<Int>(extraBufferCapacity = 1)
@@ -69,6 +73,9 @@ internal class HomeViewModel(
         ) { query, filter -> query to filter }
             .flatMapLatest { (query, filter) ->
                 when {
+                    // Favorites are served from a separate flow (`favoriteMovies`),
+                    // so the paging stream stops emitting until the user picks another filter.
+                    filter is HomeFilter.Favorites -> emptyFlow()
                     query.length >= SEARCH_MIN_LENGTH -> getMoviesByQuery(query)
                     filter is HomeFilter.Genre -> getMoviesByGenre(filter.genreId)
                     filter is HomeFilter.NowPlaying -> getNowPlayingMovies()
@@ -148,11 +155,17 @@ internal class HomeViewModel(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private fun loadGenres() {
         viewModelScope.launch {
-            runCatching { getGenres() }
-                .onSuccess { genres -> _uiState.update { it.copy(genres = genres, genresError = false) } }
-                .onFailure { _uiState.update { it.copy(genresError = true) } }
+            try {
+                val genres = getGenres()
+                _uiState.update { it.copy(genres = genres, genresError = false) }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.update { it.copy(genresError = true) }
+            }
         }
     }
 

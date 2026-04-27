@@ -10,5 +10,6 @@ data class MovieDetail(
     val releaseDate: String?,
     val runtimeMinutes: Int?,
     val tagline: String?,
+    val popularity: Double,
     val genres: List<Genre>,
 )

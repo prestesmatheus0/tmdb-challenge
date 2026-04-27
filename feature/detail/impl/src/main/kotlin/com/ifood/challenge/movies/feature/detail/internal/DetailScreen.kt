@@ -364,6 +364,7 @@ private val PREVIEW_DETAIL = MovieDetail(
     releaseDate = "2010-07-16",
     runtimeMinutes = 148,
     tagline = "Sua mente é o palco do crime",
+            popularity = 0.0,
     genres = listOf(Genre(28, "Ação"), Genre(878, "Ficção Científica")),
 )
 
