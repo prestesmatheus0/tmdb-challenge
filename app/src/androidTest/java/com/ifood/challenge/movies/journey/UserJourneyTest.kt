@@ -1,7 +1,6 @@
 package com.ifood.challenge.movies.journey
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -12,6 +11,7 @@ import com.ifood.challenge.movies.MainActivity
 import com.ifood.challenge.movies.infra.AppKoinTestRule
 import com.ifood.challenge.movies.infra.Fixtures
 import com.ifood.challenge.movies.infra.MockWebServerRule
+import com.ifood.challenge.movies.infra.createLazyAndroidComposeRule
 import com.ifood.challenge.movies.infra.waitUntilTextDisplayed
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 class UserJourneyTest {
     private val mockWebServer = MockWebServerRule()
     private val koin = AppKoinTestRule(mockWebServer)
-    private val compose = createAndroidComposeRule<MainActivity>()
+    private val compose = createLazyAndroidComposeRule<MainActivity>()
 
     @get:Rule
     val chain: RuleChain =
@@ -34,39 +34,44 @@ class UserJourneyTest {
 
     @Test
     fun launch_showsPopularMovies() {
-        compose.waitUntilTextDisplayed("Inception")
+        compose.launch()
+        compose.composeRule.waitUntilTextDisplayed("Inception")
     }
 
     @Test
     fun clickMovie_navigatesToDetail() {
-        compose.waitUntilTextDisplayed("Inception").performClick()
-        compose.waitUntilTextDisplayed("Sinopse").performScrollTo().assertIsDisplayed()
+        compose.launch()
+        compose.composeRule.waitUntilTextDisplayed("Inception").performClick()
+        compose.composeRule.waitUntilTextDisplayed("Sinopse").performScrollTo().assertIsDisplayed()
     }
 
     @Test
     fun favoriteFromDetail_increasesFavoritesChipCount() {
-        compose.waitUntilTextDisplayed("Inception").performClick()
-        compose.waitUntilTextDisplayed("Adicionar aos favoritos")
+        compose.launch()
+        compose.composeRule.waitUntilTextDisplayed("Inception").performClick()
+        compose.composeRule.waitUntilTextDisplayed("Adicionar aos favoritos")
             .performScrollTo()
             .performClick()
-        compose.onNodeWithContentDescription("Voltar").performClick()
-        compose.waitUntilTextDisplayed("Favoritos · 1")
+        compose.composeRule.onNodeWithContentDescription("Voltar").performClick()
+        compose.composeRule.waitUntilTextDisplayed("Favoritos · 1")
     }
 
     @Test
     fun searchToggle_filtersResults() {
         mockWebServer.route("/search/movie", Fixtures.searchResults("matrix"))
+        compose.launch()
 
-        compose.waitUntilTextDisplayed("Inception")
-        compose.onNodeWithContentDescription("Buscar").performClick()
-        compose.onNodeWithText("Buscar filmes…").performTextInput("matrix")
-        compose.waitUntilTextDisplayed("matrix Match")
+        compose.composeRule.waitUntilTextDisplayed("Inception")
+        compose.composeRule.onNodeWithContentDescription("Buscar").performClick()
+        compose.composeRule.onNodeWithText("Buscar filmes…").performTextInput("matrix")
+        compose.composeRule.waitUntilTextDisplayed("matrix Match")
     }
 
     @Test
     fun genreFilter_callsDiscoverEndpoint() {
-        compose.waitUntilTextDisplayed("Ação").performClick()
-        compose.waitUntilTextDisplayed("Inception")
+        compose.launch()
+        compose.composeRule.waitUntilTextDisplayed("Ação").performClick()
+        compose.composeRule.waitUntilTextDisplayed("Inception")
 
         assertTrue(
             "Expected /discover/movie request, got: ${mockWebServer.requestedPaths}",
@@ -77,50 +82,56 @@ class UserJourneyTest {
     @Test
     fun errorState_thenRetry_recovers() {
         mockWebServer.routeError("/movie/popular", code = 500)
+        compose.launch()
 
-        compose.waitUntilTextDisplayed("Tentar novamente")
+        compose.composeRule.waitUntilTextDisplayed("Tentar novamente")
 
         mockWebServer.route("/movie/popular", Fixtures.popularPage())
-        compose.onNodeWithText("Tentar novamente").performClick()
+        compose.composeRule.onNodeWithText("Tentar novamente").performClick()
 
-        compose.waitUntilTextDisplayed("Inception")
+        compose.composeRule.waitUntilTextDisplayed("Inception")
     }
 
     @Test
     fun emptyPopular_showsEmptyState() {
         mockWebServer.route("/movie/popular", Fixtures.emptyPage())
+        compose.launch()
 
-        compose.waitUntilTextDisplayed("Nenhum filme encontrado")
+        compose.composeRule.waitUntilTextDisplayed("Nenhum filme encontrado")
     }
 
     @Test
     fun searchNoResults_showsEmptyState() {
         mockWebServer.route("/search/movie", Fixtures.emptyPage())
+        compose.launch()
 
-        compose.waitUntilTextDisplayed("Inception")
-        compose.onNodeWithContentDescription("Buscar").performClick()
-        compose.onNodeWithText("Buscar filmes…").performTextInput("zzzqxx")
-        compose.waitUntilTextDisplayed("Sem resultados")
+        compose.composeRule.waitUntilTextDisplayed("Inception")
+        compose.composeRule.onNodeWithContentDescription("Buscar").performClick()
+        compose.composeRule.onNodeWithText("Buscar filmes…").performTextInput("zzzqxx")
+        compose.composeRule.waitUntilTextDisplayed("Sem resultados")
     }
 
     @Test
     fun detailLoadFailure_showsRetry() {
         mockWebServer.routeError("/movie/", code = 500)
+        compose.launch()
 
-        compose.waitUntilTextDisplayed("Inception").performClick()
-        compose.waitUntilTextDisplayed("Tentar novamente")
+        compose.composeRule.waitUntilTextDisplayed("Inception").performClick()
+        compose.composeRule.waitUntilTextDisplayed("Tentar novamente")
     }
 
     @Test
     fun favoritesEmpty_showsEmptyState() {
-        compose.waitUntilTextDisplayed("Favoritos").performClick()
-        compose.waitUntilTextDisplayed("Nenhum favorito ainda")
+        compose.launch()
+        compose.composeRule.waitUntilTextDisplayed("Favoritos").performClick()
+        compose.composeRule.waitUntilTextDisplayed("Nenhum favorito ainda")
     }
 
     @Test
     fun genresFail_doesNotBlockMovieGrid() {
         mockWebServer.routeError("/genre/movie/list", code = 500)
+        compose.launch()
 
-        compose.waitUntilTextDisplayed("Inception")
+        compose.composeRule.waitUntilTextDisplayed("Inception")
     }
 }

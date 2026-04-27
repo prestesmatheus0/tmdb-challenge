@@ -5,11 +5,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import org.junit.rules.TestRule
 
 const val DEFAULT_WAIT_MS: Long = 5_000
 
-fun <A : androidx.activity.ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.waitUntilTextDisplayed(
+fun <R : TestRule, A : androidx.activity.ComponentActivity> AndroidComposeTestRule<R, A>.waitUntilTextDisplayed(
     text: String,
     timeoutMillis: Long = DEFAULT_WAIT_MS,
 ): SemanticsNodeInteraction {
@@ -19,7 +19,7 @@ fun <A : androidx.activity.ComponentActivity> AndroidComposeTestRule<ActivitySce
     return onNodeWithText(text).assertIsDisplayed()
 }
 
-fun <A : androidx.activity.ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.waitUntilAnyTextDisplayed(
+fun <R : TestRule, A : androidx.activity.ComponentActivity> AndroidComposeTestRule<R, A>.waitUntilAnyTextDisplayed(
     text: String,
     timeoutMillis: Long = DEFAULT_WAIT_MS,
 ) {

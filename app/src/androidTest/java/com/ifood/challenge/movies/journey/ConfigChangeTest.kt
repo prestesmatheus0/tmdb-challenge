@@ -1,6 +1,5 @@
 package com.ifood.challenge.movies.journey
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -10,6 +9,7 @@ import com.ifood.challenge.movies.MainActivity
 import com.ifood.challenge.movies.infra.AppKoinTestRule
 import com.ifood.challenge.movies.infra.Fixtures
 import com.ifood.challenge.movies.infra.MockWebServerRule
+import com.ifood.challenge.movies.infra.createLazyAndroidComposeRule
 import com.ifood.challenge.movies.infra.waitUntilTextDisplayed
 import org.junit.Rule
 import org.junit.Test
@@ -20,7 +20,7 @@ import org.junit.runner.RunWith
 class ConfigChangeTest {
     private val mockWebServer = MockWebServerRule()
     private val koin = AppKoinTestRule(mockWebServer)
-    private val compose = createAndroidComposeRule<MainActivity>()
+    private val compose = createLazyAndroidComposeRule<MainActivity>()
 
     @get:Rule
     val chain: RuleChain =
@@ -31,45 +31,49 @@ class ConfigChangeTest {
 
     @Test
     fun rotation_preservesSelectedFilter() {
-        compose.waitUntilTextDisplayed("Mais Recentes").performClick()
+        compose.launch()
+        compose.composeRule.waitUntilTextDisplayed("Mais Recentes").performClick()
 
-        compose.activityRule.scenario.recreate()
+        compose.recreate()
 
-        compose.waitUntilTextDisplayed("Mais Recentes")
+        compose.composeRule.waitUntilTextDisplayed("Mais Recentes")
     }
 
     @Test
     fun rotation_preservesSearchQuery() {
         mockWebServer.route("/search/movie", Fixtures.searchResults("inception"))
+        compose.launch()
 
-        compose.waitUntilTextDisplayed("Inception")
-        compose.onNodeWithContentDescription("Buscar").performClick()
-        compose.onNodeWithText("Buscar filmes…").performTextInput("inception")
+        compose.composeRule.waitUntilTextDisplayed("Inception")
+        compose.composeRule.onNodeWithContentDescription("Buscar").performClick()
+        compose.composeRule.onNodeWithText("Buscar filmes…").performTextInput("inception")
 
-        compose.activityRule.scenario.recreate()
+        compose.recreate()
 
-        compose.waitUntilTextDisplayed("inception")
+        compose.composeRule.waitUntilTextDisplayed("inception")
     }
 
     @Test
     fun rotation_inDetail_preservesMovieId() {
-        compose.waitUntilTextDisplayed("Inception").performClick()
-        compose.waitUntilTextDisplayed("Sinopse")
+        compose.launch()
+        compose.composeRule.waitUntilTextDisplayed("Inception").performClick()
+        compose.composeRule.waitUntilTextDisplayed("Sinopse")
 
-        compose.activityRule.scenario.recreate()
+        compose.recreate()
 
-        compose.waitUntilTextDisplayed("Sinopse")
+        compose.composeRule.waitUntilTextDisplayed("Sinopse")
     }
 
     @Test
     fun rotation_preservesFavorites() {
-        compose.waitUntilTextDisplayed("Inception").performClick()
-        compose.waitUntilTextDisplayed("Adicionar aos favoritos").performClick()
-        compose.onNodeWithContentDescription("Voltar").performClick()
-        compose.waitUntilTextDisplayed("Favoritos · 1")
+        compose.launch()
+        compose.composeRule.waitUntilTextDisplayed("Inception").performClick()
+        compose.composeRule.waitUntilTextDisplayed("Adicionar aos favoritos").performClick()
+        compose.composeRule.onNodeWithContentDescription("Voltar").performClick()
+        compose.composeRule.waitUntilTextDisplayed("Favoritos · 1")
 
-        compose.activityRule.scenario.recreate()
+        compose.recreate()
 
-        compose.waitUntilTextDisplayed("Favoritos · 1")
+        compose.composeRule.waitUntilTextDisplayed("Favoritos · 1")
     }
 }
