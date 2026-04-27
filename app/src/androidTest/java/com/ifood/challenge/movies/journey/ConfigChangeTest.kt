@@ -22,9 +22,7 @@ import org.junit.runner.RunWith
  * `activityRule.scenario.recreate()` mimics rotation by destroying and reinstantiating the
  * Activity. ViewModels backed by SavedStateHandle restore their state automatically.
  *
- * Follows the Android Compose testing guide patterns
- * (https://developer.android.com/develop/ui/compose/testing): semantic finders + waitUntil
- * idle synchronization.
+ * Default happy-path routes pre-registered in [MockWebServerRule.before].
  */
 @RunWith(AndroidJUnit4::class)
 class ConfigChangeTest {
@@ -41,11 +39,6 @@ class ConfigChangeTest {
 
     @Test
     fun rotation_preservesSelectedFilter() {
-        mockWebServer.route("/movie/popular", Fixtures.popularPage())
-        mockWebServer.route("/movie/now_playing", Fixtures.popularPage())
-        mockWebServer.route("/genre/movie/list", Fixtures.genres())
-        mockWebServer.route("/discover/movie", Fixtures.popularPage())
-
         compose.waitUntilTextDisplayed("Mais Recentes").performClick()
 
         compose.activityRule.scenario.recreate()
@@ -56,8 +49,7 @@ class ConfigChangeTest {
 
     @Test
     fun rotation_preservesSearchQuery() {
-        mockWebServer.route("/movie/popular", Fixtures.popularPage())
-        mockWebServer.route("/genre/movie/list", Fixtures.genres())
+        // Use specific search response so we can detect it after rotation.
         mockWebServer.route("/search/movie", Fixtures.searchResults("inception"))
 
         compose.waitUntilTextDisplayed("Inception")
@@ -71,10 +63,6 @@ class ConfigChangeTest {
 
     @Test
     fun rotation_inDetail_preservesMovieId() {
-        mockWebServer.route("/movie/popular", Fixtures.popularPage())
-        mockWebServer.route("/movie/27205", Fixtures.movieDetail(movieId = 27205))
-        mockWebServer.route("/genre/movie/list", Fixtures.genres())
-
         compose.waitUntilTextDisplayed("Inception").performClick()
         compose.waitUntilTextDisplayed("Sinopse")
 
@@ -85,10 +73,6 @@ class ConfigChangeTest {
 
     @Test
     fun rotation_preservesFavorites() {
-        mockWebServer.route("/movie/popular", Fixtures.popularPage())
-        mockWebServer.route("/movie/27205", Fixtures.movieDetail(movieId = 27205))
-        mockWebServer.route("/genre/movie/list", Fixtures.genres())
-
         compose.waitUntilTextDisplayed("Inception").performClick()
         compose.waitUntilTextDisplayed("Adicionar aos favoritos").performClick()
         compose.onNodeWithContentDescription("Voltar").performClick()

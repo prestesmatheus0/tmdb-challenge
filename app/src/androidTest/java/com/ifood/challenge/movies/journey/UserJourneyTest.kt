@@ -23,6 +23,9 @@ import org.junit.runner.RunWith
  * End-to-end user journeys: real Activity, real Koin (with overrides), real Room (in-memory),
  * fake network via MockWebServer.
  *
+ * Default happy-path routes are pre-registered by [MockWebServerRule.before]. Tests only
+ * override routes when exercising error / edge cases.
+ *
  * Patterns follow https://developer.android.com/develop/ui/compose/testing :
  *  - `createAndroidComposeRule<MainActivity>()` to launch the real Activity
  *  - Finders: `onNodeWithText`, `onNodeWithContentDescription` (semantics-based)
@@ -46,28 +49,17 @@ class UserJourneyTest {
 
     @Test
     fun launch_showsPopularMovies() {
-        mockWebServer.route("/movie/popular", Fixtures.popularPage())
-        mockWebServer.route("/genre/movie/list", Fixtures.genres())
-
         compose.waitUntilTextDisplayed("Inception")
     }
 
     @Test
     fun clickMovie_navigatesToDetail() {
-        mockWebServer.route("/movie/popular", Fixtures.popularPage())
-        mockWebServer.route("/movie/27205", Fixtures.movieDetail(movieId = 27205))
-        mockWebServer.route("/genre/movie/list", Fixtures.genres())
-
         compose.waitUntilTextDisplayed("Inception").performClick()
         compose.waitUntilTextDisplayed("Sinopse").performScrollTo().assertIsDisplayed()
     }
 
     @Test
     fun favoriteFromDetail_increasesFavoritesChipCount() {
-        mockWebServer.route("/movie/popular", Fixtures.popularPage())
-        mockWebServer.route("/movie/27205", Fixtures.movieDetail(movieId = 27205))
-        mockWebServer.route("/genre/movie/list", Fixtures.genres())
-
         compose.waitUntilTextDisplayed("Inception").performClick()
         compose.waitUntilTextDisplayed("Adicionar aos favoritos")
             .performScrollTo()
@@ -78,8 +70,7 @@ class UserJourneyTest {
 
     @Test
     fun searchToggle_filtersResults() {
-        mockWebServer.route("/movie/popular", Fixtures.popularPage())
-        mockWebServer.route("/genre/movie/list", Fixtures.genres())
+        // Override default search route to return matrix-specific results.
         mockWebServer.route("/search/movie", Fixtures.searchResults("matrix"))
 
         compose.waitUntilTextDisplayed("Inception")
@@ -90,10 +81,6 @@ class UserJourneyTest {
 
     @Test
     fun genreFilter_callsDiscoverEndpoint() {
-        mockWebServer.route("/movie/popular", Fixtures.popularPage())
-        mockWebServer.route("/genre/movie/list", Fixtures.genres())
-        mockWebServer.route("/discover/movie", Fixtures.popularPage())
-
         compose.waitUntilTextDisplayed("Ação").performClick()
         compose.waitUntilTextDisplayed("Inception")
 
@@ -106,15 +93,58 @@ class UserJourneyTest {
 
     @Test
     fun errorState_thenRetry_recovers() {
-        mockWebServer.route("/genre/movie/list", Fixtures.genres())
+        // Override default popular response with a 500 to trigger error UI.
         mockWebServer.routeError("/movie/popular", code = 500)
 
         compose.waitUntilTextDisplayed("Tentar novamente")
 
-        // Swap to success then retry
+        // Swap back to success then retry.
         mockWebServer.route("/movie/popular", Fixtures.popularPage())
         compose.onNodeWithText("Tentar novamente").performClick()
 
+        compose.waitUntilTextDisplayed("Inception")
+    }
+
+    // ─── Negative paths ───
+
+    @Test
+    fun emptyPopular_showsEmptyState() {
+        mockWebServer.route("/movie/popular", Fixtures.emptyPage())
+
+        compose.waitUntilTextDisplayed("Nenhum filme encontrado")
+    }
+
+    @Test
+    fun searchNoResults_showsEmptyState() {
+        mockWebServer.route("/search/movie", Fixtures.emptyPage())
+
+        compose.waitUntilTextDisplayed("Inception")
+        compose.onNodeWithContentDescription("Buscar").performClick()
+        compose.onNodeWithText("Buscar filmes…").performTextInput("zzzqxx")
+        compose.waitUntilTextDisplayed("Sem resultados")
+    }
+
+    @Test
+    fun detailLoadFailure_showsRetry() {
+        // Default popular keeps grid populated; detail endpoint returns 500.
+        mockWebServer.routeError("/movie/", code = 500)
+
+        compose.waitUntilTextDisplayed("Inception").performClick()
+        compose.waitUntilTextDisplayed("Tentar novamente")
+    }
+
+    @Test
+    fun favoritesEmpty_showsEmptyState() {
+        compose.waitUntilTextDisplayed("Favoritos").performClick()
+        compose.waitUntilTextDisplayed("Nenhum favorito ainda")
+    }
+
+    @Test
+    fun genresFail_doesNotBlockMovieGrid() {
+        // Genre chips API fails but popular endpoint still works.
+        mockWebServer.routeError("/genre/movie/list", code = 500)
+
+        // Grid still loads from popular endpoint.
         compose.waitUntilTextDisplayed("Inception")
     }
 }
