@@ -16,7 +16,6 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:network:public"))
     implementation(project(":core:network:impl"))
-    implementation(project(":core:database:public"))
     implementation(project(":core:database:impl"))
 
     implementation(libs.retrofit.core)
@@ -30,6 +29,7 @@ dependencies {
     implementation(libs.androidx.room.paging)
     ksp(libs.androidx.room.compiler)
 
+    testImplementation(project(":core:testing"))
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.okhttp.mockwebserver)

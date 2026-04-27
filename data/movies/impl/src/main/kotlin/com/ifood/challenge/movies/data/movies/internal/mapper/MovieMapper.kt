@@ -10,7 +10,10 @@ import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 
-internal fun MovieDto.toEntity(page: Int, fetchedAt: Long = System.currentTimeMillis()): MovieEntity =
+internal fun MovieDto.toEntity(
+    page: Int,
+    fetchedAt: Long = System.currentTimeMillis(),
+): MovieEntity =
     MovieEntity(
         id = id,
         title = title,
@@ -47,6 +50,7 @@ internal fun MovieDetailDto.toEntity(fetchedAt: Long = System.currentTimeMillis(
         releaseDate = releaseDate,
         runtimeMinutes = runtime,
         tagline = tagline,
+        popularity = popularity,
         genresCsv = genres.joinToString(",") { it.id.toString() + ":" + it.name },
         fetchedAt = fetchedAt,
     )
@@ -62,6 +66,7 @@ internal fun MovieDetailEntity.toDomain(): MovieDetail =
         releaseDate = releaseDate,
         runtimeMinutes = runtimeMinutes,
         tagline = tagline,
+        popularity = popularity,
         genres = parseGenresCsv(genresCsv),
     )
 
@@ -84,8 +89,24 @@ internal fun Movie.toFavoriteEntity(addedAt: Long = System.currentTimeMillis()):
         movieId = id,
         title = title,
         posterPath = posterPath,
+        backdropPath = backdropPath,
+        overview = overview,
         voteAverage = voteAverage,
+        releaseDate = releaseDate,
+        popularity = popularity,
         addedAt = addedAt,
+    )
+
+internal fun FavoriteEntity.toDomain(): Movie =
+    Movie(
+        id = movieId,
+        title = title,
+        posterPath = posterPath,
+        backdropPath = backdropPath,
+        overview = overview,
+        voteAverage = voteAverage,
+        releaseDate = releaseDate,
+        popularity = popularity,
     )
 
 private fun parseGenresCsv(csv: String): List<Genre> {

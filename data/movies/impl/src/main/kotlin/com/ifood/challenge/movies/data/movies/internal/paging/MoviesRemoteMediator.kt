@@ -32,18 +32,23 @@ internal class MoviesRemoteMediator(
         }
     }
 
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, MovieEntity>): MediatorResult {
+    override suspend fun load(
+        loadType: LoadType,
+        state: PagingState<Int, MovieEntity>,
+    ): MediatorResult {
         return try {
-            val page = when (loadType) {
-                LoadType.REFRESH -> STARTING_PAGE
-                LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
-                LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull()
-                        ?: return MediatorResult.Success(endOfPaginationReached = true)
-                    remoteKeyDao.remoteKey(lastItem.id)?.nextPage
-                        ?: return MediatorResult.Success(endOfPaginationReached = true)
+            val page =
+                when (loadType) {
+                    LoadType.REFRESH -> STARTING_PAGE
+                    LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
+                    LoadType.APPEND -> {
+                        val lastItem =
+                            state.lastItemOrNull()
+                                ?: return MediatorResult.Success(endOfPaginationReached = true)
+                        remoteKeyDao.remoteKey(lastItem.id)?.nextPage
+                            ?: return MediatorResult.Success(endOfPaginationReached = true)
+                    }
                 }
-            }
 
             val response = apiService.popular(page)
             val endOfPagination = response.page >= response.totalPages
@@ -56,14 +61,15 @@ internal class MoviesRemoteMediator(
 
                 val fetchedAt = System.currentTimeMillis()
                 val movies = response.results.map { it.toEntity(page, fetchedAt) }
-                val keys = response.results.map { dto ->
-                    RemoteKeyEntity(
-                        movieId = dto.id,
-                        prevPage = if (page == STARTING_PAGE) null else page - 1,
-                        nextPage = if (endOfPagination) null else page + 1,
-                        lastUpdated = fetchedAt,
-                    )
-                }
+                val keys =
+                    response.results.map { dto ->
+                        RemoteKeyEntity(
+                            movieId = dto.id,
+                            prevPage = if (page == STARTING_PAGE) null else page - 1,
+                            nextPage = if (endOfPagination) null else page + 1,
+                            lastUpdated = fetchedAt,
+                        )
+                    }
                 movieDao.upsertAll(movies)
                 remoteKeyDao.upsertAll(keys)
             }

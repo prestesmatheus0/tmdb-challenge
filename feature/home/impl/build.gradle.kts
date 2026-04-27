@@ -14,7 +14,6 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:network:public"))
     implementation(project(":domain:movies:public"))
-    implementation(project(":feature:detail:public"))
 
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)

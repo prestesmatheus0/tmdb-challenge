@@ -15,7 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.ifood.challenge.movies.core.designsystem.R
+import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
+import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 @Composable
 fun OfflineBanner(modifier: Modifier = Modifier) {
@@ -24,19 +29,19 @@ fun OfflineBanner(modifier: Modifier = Modifier) {
             modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.tertiaryContainer)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.sm)
                 .testTag(OfflineBannerTestTags.root),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xs),
     ) {
         Icon(
             imageVector = Icons.Filled.CloudOff,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onTertiaryContainer,
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier.size(Dimens.IconSizeMd),
         )
         Text(
-            text = "Você está offline. Exibindo dados em cache.",
+            text = stringResource(R.string.offline_banner_message),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onTertiaryContainer,
         )
@@ -45,4 +50,12 @@ fun OfflineBanner(modifier: Modifier = Modifier) {
 
 object OfflineBannerTestTags {
     const val root = "offline_banner"
+}
+
+@PreviewThemes
+@Composable
+private fun OfflineBannerPreview() {
+    IfoodMoviesTheme {
+        OfflineBanner()
+    }
 }

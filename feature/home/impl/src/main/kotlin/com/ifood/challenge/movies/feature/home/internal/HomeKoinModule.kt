@@ -7,7 +7,9 @@ val homeKoinModule =
     module {
         viewModel {
             HomeViewModel(
+                savedStateHandle = get(),
                 getPopularMovies = get(),
+                getNowPlayingMovies = get(),
                 getMoviesByGenre = get(),
                 getMoviesByQuery = get(),
                 getGenres = get(),

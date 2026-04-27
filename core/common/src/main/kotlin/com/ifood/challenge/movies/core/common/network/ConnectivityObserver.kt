@@ -38,8 +38,9 @@ class AndroidConnectivityObserver(
                         network: Network,
                         capabilities: NetworkCapabilities,
                     ) {
-                        val validated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                        val validated =
+                            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
                         if (validated) {
                             validatedNetworks.add(network)
                         } else {
@@ -71,8 +72,9 @@ class AndroidConnectivityObserver(
 
     private fun currentStatus(manager: ConnectivityManager): NetworkStatus {
         val caps = manager.getNetworkCapabilities(manager.activeNetwork)
-        val online = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true &&
-            caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        val online =
+            caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true &&
+                caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
         return if (online) NetworkStatus.Online else NetworkStatus.Offline
     }
 }

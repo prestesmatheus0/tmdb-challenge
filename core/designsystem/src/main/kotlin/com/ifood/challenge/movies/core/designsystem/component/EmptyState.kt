@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,7 +20,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
+import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 @Composable
 fun EmptyState(
@@ -32,7 +37,7 @@ fun EmptyState(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(horizontal = 32.dp, vertical = 48.dp)
+                .padding(horizontal = MaterialTheme.spacing.xl, vertical = MaterialTheme.spacing.xxl)
                 .testTag(testTag),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -40,7 +45,7 @@ fun EmptyState(
         Box(
             modifier =
                 Modifier
-                    .size(80.dp)
+                    .size(Dimens.CircleBackgroundLg)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh),
             contentAlignment = Alignment.Center,
@@ -49,17 +54,17 @@ fun EmptyState(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(Dimens.IconSizeLg),
             )
         }
-        Box(Modifier.size(16.dp))
+        Box(Modifier.size(MaterialTheme.spacing.md))
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
-        Box(Modifier.size(8.dp))
+        Box(Modifier.size(MaterialTheme.spacing.xs))
         Text(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
@@ -73,4 +78,16 @@ object EmptyStateTestTags {
     const val default = "empty_state"
     const val favoritesEmpty = "empty_state_favorites"
     const val searchEmpty = "empty_state_search"
+}
+
+@PreviewThemes
+@Composable
+private fun EmptyStatePreview() {
+    IfoodMoviesTheme {
+        EmptyState(
+            icon = Icons.Filled.Movie,
+            title = "Nenhum favorito ainda",
+            description = "Favorite filmes para vê-los aqui",
+        )
+    }
 }

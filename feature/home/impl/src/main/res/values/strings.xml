@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TopBar -->
+    <string name="home_title">Filmes</string>
+    <string name="home_search_close">Fechar busca</string>
+    <string name="home_search_open">Buscar</string>
+    <string name="home_shuffle_description">Filme aleatório dos favoritos</string>
+    <string name="home_search_placeholder">Buscar filmes…</string>
+
+    <!-- Filter chips -->
+    <string name="home_chip_popular">Popular</string>
+    <string name="home_chip_favorites">Favoritos</string>
+    <string name="home_chip_favorites_count">Favoritos · %1$d</string>
+    <string name="home_chip_now_playing">Mais Recentes</string>
+
+    <!-- Empty / error states -->
+    <string name="home_favorites_empty_title">Nenhum favorito ainda</string>
+    <string name="home_favorites_empty_description">Favorite filmes para vê-los aqui</string>
+    <string name="home_search_empty_title">Sem resultados</string>
+    <string name="home_search_empty_description">Tente outro termo de busca</string>
+    <string name="home_movies_empty_title">Nenhum filme encontrado</string>
+    <string name="home_movies_empty_description">Tente outro gênero</string>
+</resources>

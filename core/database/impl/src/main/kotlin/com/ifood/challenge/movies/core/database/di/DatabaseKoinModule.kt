@@ -16,7 +16,15 @@ val databaseKoinModule =
                 androidContext(),
                 MoviesDatabase::class.java,
                 MoviesDatabase.NAME,
-            ).fallbackToDestructiveMigration().build()
+            )
+                .addMigrations(
+                    MoviesDatabase.MIGRATION_1_2,
+                    MoviesDatabase.MIGRATION_2_3,
+                )
+                // Cache tables (movies, movie_detail, remote_keys) are recoverable from network;
+                // user-owned data (favorite_movies) has a real migration above.
+                .fallbackToDestructiveMigrationOnDowngrade()
+                .build()
         }
         single<MovieDao> { get<MoviesDatabase>().movieDao() }
         single<MovieDetailDao> { get<MoviesDatabase>().movieDetailDao() }

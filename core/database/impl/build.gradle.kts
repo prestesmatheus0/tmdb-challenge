@@ -9,11 +9,11 @@ android {
 }
 
 dependencies {
-    api(project(":core:database:public"))
-
-    implementation(libs.androidx.room.runtime)
+    api(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
+    implementation(libs.androidx.paging.common)
+    implementation(libs.kotlinx.coroutines.core)
     ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.androidx.room.testing)

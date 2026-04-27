@@ -32,9 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.ifood.challenge.movies.core.designsystem.component.EmptyState
 import com.ifood.challenge.movies.core.designsystem.component.ErrorState
@@ -44,11 +46,16 @@ import com.ifood.challenge.movies.core.designsystem.component.MovieCard
 import com.ifood.challenge.movies.core.designsystem.component.MovieCardSkeleton
 import com.ifood.challenge.movies.core.designsystem.component.MovieFilterChip
 import com.ifood.challenge.movies.core.designsystem.component.OfflineBanner
-import com.ifood.challenge.movies.domain.movies.model.Movie
-import org.koin.compose.koinInject
+import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
+import com.ifood.challenge.movies.core.network.BackdropSize
 import com.ifood.challenge.movies.core.network.ImageUrlBuilder
-
-private const val FAVORITES_KEY = -1
+import com.ifood.challenge.movies.core.network.PosterSize
+import com.ifood.challenge.movies.domain.movies.model.Genre
+import com.ifood.challenge.movies.domain.movies.model.Movie
+import kotlinx.coroutines.flow.flowOf
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,11 +63,10 @@ internal fun HomeScreen(
     uiState: HomeUiState,
     movies: LazyPagingItems<Movie>,
     onMovieClick: (movieId: Int) -> Unit,
-    onGenreSelect: (genreId: Int?) -> Unit,
+    onFilterSelect: (HomeFilter) -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onSearchToggle: () -> Unit,
     onFavoriteToggle: (Movie) -> Unit,
-    onFavoritesToggle: () -> Unit,
     onShuffle: () -> Unit,
     modifier: Modifier = Modifier,
     imageUrlBuilder: ImageUrlBuilder = koinInject(),
@@ -71,12 +77,14 @@ internal fun HomeScreen(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text("Filmes") },
+                title = { Text(stringResource(R.string.home_title)) },
                 actions = {
                     IconButton(onClick = onSearchToggle) {
                         Icon(
                             imageVector = if (uiState.isSearchActive) Icons.Default.SearchOff else Icons.Default.Search,
-                            contentDescription = if (uiState.isSearchActive) "Fechar busca" else "Buscar",
+                            contentDescription = stringResource(
+                                if (uiState.isSearchActive) R.string.home_search_close else R.string.home_search_open,
+                            ),
                         )
                     }
                 },
@@ -91,7 +99,7 @@ internal fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shuffle,
-                        contentDescription = "Filme aleatório dos favoritos",
+                        contentDescription = stringResource(R.string.home_shuffle_description),
                     )
                 }
             }
@@ -108,14 +116,14 @@ internal fun HomeScreen(
                                 onSearch = {},
                                 expanded = false,
                                 onExpandedChange = {},
-                                placeholder = { Text("Buscar filmes…") },
+                                placeholder = { Text(stringResource(R.string.home_search_placeholder)) },
                             )
                         },
                         expanded = false,
                         onExpandedChange = {},
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .padding(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.xxs)
                             .testTag("home_search_bar"),
                         content = {},
                     )
@@ -125,36 +133,32 @@ internal fun HomeScreen(
                     OfflineBanner()
                 }
 
-                val modeChips = listOf(
-                    MovieFilterChip<Int?>(key = null, label = "Popular"),
-                    MovieFilterChip<Int?>(key = FAVORITES_KEY, label = "Favoritos"),
-                )
-                val genreChips = uiState.genres.map { MovieFilterChip<Int?>(key = it.id, label = it.name) }
-                val allChips = if (uiState.showFavorites) {
-                    modeChips
+                val favCount = uiState.favoriteIds.size
+                val favLabel = if (favCount > 0) {
+                    stringResource(R.string.home_chip_favorites_count, favCount)
                 } else {
-                    modeChips + MovieFilterChip<Int?>(key = null, label = "Todos") + genreChips
+                    stringResource(R.string.home_chip_favorites)
                 }
-                val selectedChip: Int? = when {
-                    uiState.showFavorites -> FAVORITES_KEY
-                    else -> uiState.selectedGenreId
+                val modeChips = listOf(
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.Popular, label = stringResource(R.string.home_chip_popular)),
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.Favorites, label = favLabel),
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.NowPlaying, label = stringResource(R.string.home_chip_now_playing)),
+                )
+                val genreChips = uiState.genres.map {
+                    MovieFilterChip<HomeFilter>(key = HomeFilter.Genre(it.id), label = it.name)
                 }
+                val allChips = modeChips + genreChips
 
                 if (allChips.size > 1) {
                     FilterChipRow(
-                        chips = allChips.distinctBy { it.key },
-                        selected = selectedChip,
-                        onSelect = { key ->
-                            when (key) {
-                                FAVORITES_KEY -> onFavoritesToggle()
-                                else -> onGenreSelect(key)
-                            }
-                        },
+                        chips = allChips,
+                        selected = uiState.filter,
+                        onSelect = onFilterSelect,
                     )
                 }
 
-                when {
-                    uiState.showFavorites -> FavoritesContent(
+                when (uiState.filter) {
+                    HomeFilter.Favorites -> FavoritesContent(
                         movies = uiState.favoriteMovies,
                         favoriteIds = uiState.favoriteIds,
                         imageUrlBuilder = imageUrlBuilder,
@@ -187,16 +191,16 @@ private fun FavoritesContent(
     if (movies.isEmpty()) {
         EmptyState(
             icon = Icons.Default.Movie,
-            title = "Nenhum favorito ainda",
-            description = "Favorite filmes para vê-los aqui",
+            title = stringResource(R.string.home_favorites_empty_title),
+            description = stringResource(R.string.home_favorites_empty_description),
             modifier = Modifier.fillMaxSize(),
         )
     } else {
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
             modifier = Modifier.fillMaxSize(),
         ) {
             items(count = movies.size, key = { movies[it].id }) { index ->
@@ -234,8 +238,8 @@ private fun PagingContent(
         )
         movies.itemCount == 0 && refreshState is LoadState.NotLoading -> EmptyState(
             icon = if (isSearchActive) Icons.Default.SearchOff else Icons.Default.Movie,
-            title = if (isSearchActive) "Sem resultados" else "Nenhum filme encontrado",
-            description = if (isSearchActive) "Tente outro termo de busca" else "Tente outro gênero",
+            title = stringResource(if (isSearchActive) R.string.home_search_empty_title else R.string.home_movies_empty_title),
+            description = stringResource(if (isSearchActive) R.string.home_search_empty_description else R.string.home_movies_empty_description),
             modifier = Modifier.fillMaxSize(),
         )
         else -> MovieGrid(
@@ -258,9 +262,9 @@ private fun MovieGrid(
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
         modifier = Modifier.fillMaxSize(),
     ) {
         items(
@@ -296,11 +300,96 @@ private fun MovieGrid(
 private fun SkeletonGrid() {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.md, vertical = MaterialTheme.spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
         modifier = Modifier.fillMaxSize(),
     ) {
         items(6) { MovieCardSkeleton() }
+    }
+}
+
+private val PREVIEW_GENRES = listOf(
+    Genre(28, "Ação"),
+    Genre(12, "Aventura"),
+    Genre(16, "Animação"),
+)
+
+private val PREVIEW_MOVIE = Movie(
+    id = 1,
+    title = "Inception",
+    posterPath = null,
+    backdropPath = null,
+    overview = "",
+    voteAverage = 8.8,
+    releaseDate = "2010-07-16",
+    popularity = 100.0,
+)
+
+private val PREVIEW_IMAGE_BUILDER = object : ImageUrlBuilder {
+    override fun poster(path: String?, size: PosterSize) = ""
+
+    override fun backdrop(path: String?, size: BackdropSize) = ""
+}
+
+@PreviewThemes
+@Composable
+private fun HomeScreenEmptyPreview() {
+    IfoodMoviesTheme {
+        val movies = flowOf(PagingData.empty<Movie>()).collectAsLazyPagingItems()
+        HomeScreen(
+            uiState = HomeUiState(genres = PREVIEW_GENRES),
+            movies = movies,
+            onMovieClick = {},
+            onFilterSelect = {},
+            onSearchQueryChange = {},
+            onSearchToggle = {},
+            onFavoriteToggle = {},
+            onShuffle = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
+    }
+}
+
+@PreviewThemes
+@Composable
+private fun HomeScreenFavoritesPreview() {
+    IfoodMoviesTheme {
+        val movies = flowOf(PagingData.empty<Movie>()).collectAsLazyPagingItems()
+        HomeScreen(
+            uiState = HomeUiState(
+                filter = HomeFilter.Favorites,
+                favoriteIds = setOf(1),
+                favoriteMovies = listOf(PREVIEW_MOVIE),
+                genres = PREVIEW_GENRES,
+            ),
+            movies = movies,
+            onMovieClick = {},
+            onFilterSelect = {},
+            onSearchQueryChange = {},
+            onSearchToggle = {},
+            onFavoriteToggle = {},
+            onShuffle = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
+    }
+}
+
+@PreviewThemes
+@Composable
+private fun HomeScreenOfflinePreview() {
+    IfoodMoviesTheme {
+        val movies = flowOf(PagingData.empty<Movie>()).collectAsLazyPagingItems()
+        HomeScreen(
+            uiState = HomeUiState(isOffline = true, genres = PREVIEW_GENRES),
+            movies = movies,
+            onMovieClick = {},
+            onFilterSelect = {},
+            onSearchQueryChange = {},
+            onSearchToggle = {},
+            onFavoriteToggle = {},
+            onShuffle = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
     }
 }

@@ -1,0 +1,71 @@
+package com.ifood.challenge.movies.infra
+
+import okhttp3.mockwebserver.Dispatcher
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
+import org.junit.rules.ExternalResource
+
+/**
+ * Spins up a local [MockWebServer] for each test.
+ *
+ * Routes are matched by URL prefix and respond with canned JSON. Use [enqueueResponse]
+ * for one-off responses; the dispatcher fallback returns 404 for unmatched paths.
+ */
+class MockWebServerRule : ExternalResource() {
+    val server: MockWebServer = MockWebServer()
+    val baseUrl: String get() = server.url("/").toString()
+
+    // Accessed from both the test thread (route()/routeError()) and OkHttp dispatcher thread.
+    // ConcurrentHashMap provides safe concurrent reads + writes without explicit synchronization.
+    private val routes = java.util.concurrent.ConcurrentHashMap<String, () -> MockResponse>()
+    private val recordedPaths = mutableListOf<String>()
+
+    /** Snapshot of every path the server has dispatched, in order. Reset per test. */
+    val requestedPaths: List<String> get() = recordedPaths.toList()
+
+    override fun before() {
+        routes.clear()
+        recordedPaths.clear()
+        server.dispatcher =
+            object : Dispatcher() {
+                override fun dispatch(request: RecordedRequest): MockResponse {
+                    val path = request.path.orEmpty()
+                    synchronized(recordedPaths) { recordedPaths.add(path) }
+                    val handler = routes.entries.firstOrNull { (prefix, _) -> path.startsWith(prefix) }
+                    return handler?.value?.invoke() ?: MockResponse().setResponseCode(404)
+                }
+            }
+        server.start()
+    }
+
+    override fun after() {
+        server.shutdown()
+    }
+
+    /** Register a JSON response for any path matching [pathPrefix]. */
+    fun route(
+        pathPrefix: String,
+        body: String,
+        code: Int = 200,
+    ) {
+        routes[pathPrefix] = {
+            MockResponse()
+                .setResponseCode(code)
+                .setHeader("Content-Type", "application/json")
+                .setBody(body)
+        }
+    }
+
+    /** Replace any handler for [pathPrefix] with an error response. */
+    fun routeError(
+        pathPrefix: String,
+        code: Int = 500,
+    ) {
+        routes[pathPrefix] = { MockResponse().setResponseCode(code) }
+    }
+
+    /** True if any recorded request started with [pathPrefix]. */
+    fun hasRequestStartingWith(pathPrefix: String): Boolean =
+        synchronized(recordedPaths) { recordedPaths.any { it.startsWith(pathPrefix) } }
+}

@@ -5,9 +5,9 @@ import org.koin.dsl.module
 
 val detailKoinModule =
     module {
-        viewModel { (movieId: Int) ->
+        viewModel {
             DetailViewModel(
-                movieId = movieId,
+                savedStateHandle = get(),
                 fetchDetail = get(),
                 observeDetail = get(),
                 observeIsFavorite = get(),

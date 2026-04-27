@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-val tmdbApiKey: String = run {
+fun loadTmdbApiKey(): String {
     val props = Properties()
     val localProps = rootProject.file("local.properties")
     if (localProps.exists()) {
@@ -23,8 +23,10 @@ val tmdbApiKey: String = run {
                 "variable before running the app. See README.",
         )
     }
-    key
+    return key
 }
+
+val tmdbApiKey: String = loadTmdbApiKey()
 
 android {
     namespace = "com.ifood.challenge.movies"
@@ -67,7 +69,7 @@ android {
     }
 
     packaging {
-        resources.excludes += setOf(
+        resources.excludes += listOf(
             "/META-INF/{AL2.0,LGPL2.1}",
             "META-INF/LICENSE.md",
             "META-INF/LICENSE-notice.md",
@@ -82,7 +84,6 @@ dependencies {
     implementation(project(":core:network:impl"))
     implementation(project(":core:network:public"))
     implementation(project(":core:database:impl"))
-    implementation(project(":core:database:public"))
 
     implementation(project(":data:movies:impl"))
     implementation(project(":data:movies:public"))
@@ -98,4 +99,13 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
+
+    testImplementation(libs.androidx.navigation.testing)
+    testImplementation(libs.kotlinx.serialization.json)
+
+    androidTestImplementation(libs.koin.test)
+    androidTestImplementation(libs.koin.test.junit4)
+    androidTestImplementation(libs.okhttp.mockwebserver)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.kotlinx.serialization.json)
 }

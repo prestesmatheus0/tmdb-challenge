@@ -14,5 +14,6 @@ internal data class MovieDetailDto(
     @SerialName("release_date") val releaseDate: String? = null,
     @SerialName("runtime") val runtime: Int? = null,
     @SerialName("tagline") val tagline: String? = null,
+    @SerialName("popularity") val popularity: Double = 0.0,
     @SerialName("genres") val genres: List<GenreDto> = emptyList(),
 )

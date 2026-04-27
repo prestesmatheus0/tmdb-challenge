@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>iFood — Movie App v2 (M3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="android-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { font-family: 'Roboto Flex', sans-serif; }
+  body {
+    background: #0a0a0e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .material-symbols-rounded {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    user-select: none;
+  }
+  .page-wrapper {
+    display: flex;
+    gap: 48px;
+    align-items: flex-start;
+    padding: 40px;
+  }
+  .screen-label {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    font-family: 'Roboto Mono', 'Roboto Flex', monospace;
+    text-align: center;
+    margin-top: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  /* Material 3 state layer */
+  .m3-interactive {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .m3-interactive::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+  }
+  .m3-interactive:hover::before { opacity: 0.08; }
+  .m3-interactive:active::before { opacity: 0.12; }
+  ::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "darkMode": true,
+  "accentHue": 255,
+  "offline": false,
+  "showFab": true,
+  "errorState": "none"
+}/*EDITMODE-END*/;
+
+// ─── MATERIAL 3 TYPE SCALE (Roboto Flex) ─────────────────────────────────────
+const TYPE = {
+  displaySmall:   { fontSize: 36, lineHeight: '44px', weight: 400, tracking: 0 },
+  headlineMedium: { fontSize: 28, lineHeight: '36px', weight: 400, tracking: 0 },
+  headlineSmall:  { fontSize: 24, lineHeight: '32px', weight: 400, tracking: 0 },
+  titleLarge:     { fontSize: 22, lineHeight: '28px', weight: 400, tracking: 0 },
+  titleMedium:    { fontSize: 16, lineHeight: '24px', weight: 500, tracking: 0.15 },
+  titleSmall:     { fontSize: 14, lineHeight: '20px', weight: 500, tracking: 0.1 },
+  bodyLarge:      { fontSize: 16, lineHeight: '24px', weight: 400, tracking: 0.5 },
+  bodyMedium:     { fontSize: 14, lineHeight: '20px', weight: 400, tracking: 0.25 },
+  bodySmall:      { fontSize: 12, lineHeight: '16px', weight: 400, tracking: 0.4 },
+  labelLarge:     { fontSize: 14, lineHeight: '20px', weight: 500, tracking: 0.1 },
+  labelMedium:    { fontSize: 12, lineHeight: '16px', weight: 500, tracking: 0.5 },
+  labelSmall:     { fontSize: 11, lineHeight: '16px', weight: 500, tracking: 0.5 },
+};
+
+const ty = (scale) => ({
+  fontSize: scale.fontSize,
+  lineHeight: scale.lineHeight,
+  fontWeight: scale.weight,
+  letterSpacing: scale.tracking,
+});
+
+// ─── MATERIAL 3 COLOR SYSTEM ─────────────────────────────────────────────────
+const makeTheme = (dark, hue) => {
+  const c = (l, ch, h = hue) => `oklch(${l} ${ch} ${h})`;
+  return {
+    dark,
+    hue,
+    // Primary
+    primary:            dark ? c(0.80, 0.12) : c(0.45, 0.15),
+    onPrimary:          dark ? c(0.22, 0.10) : '#ffffff',
+    primaryContainer:   dark ? c(0.33, 0.12) : c(0.90, 0.08),
+    onPrimaryContainer: dark ? c(0.90, 0.08) : c(0.20, 0.12),
+    // Surfaces (M3 tonal surfaces)
+    surface:              dark ? c(0.18, 0.01) : c(0.99, 0.005),
+    surfaceDim:           dark ? c(0.15, 0.01) : c(0.92, 0.005),
+    surfaceBright:        dark ? c(0.25, 0.01) : c(1.00, 0.005),
+    surfaceContainerLow:  dark ? c(0.20, 0.01) : c(0.97, 0.005),
+    surfaceContainer:     dark ? c(0.22, 0.01) : c(0.95, 0.005),
+    surfaceContainerHigh: dark ? c(0.25, 0.01) : c(0.93, 0.005),
+    surfaceContainerHighest: dark ? c(0.28, 0.01) : c(0.91, 0.005),
+    onSurface:            dark ? c(0.92, 0.01) : c(0.18, 0.01),
+    onSurfaceVariant:     dark ? c(0.75, 0.01) : c(0.40, 0.01),
+    outline:              dark ? c(0.55, 0.01) : c(0.55, 0.01),
+    outlineVariant:       dark ? c(0.32, 0.01) : c(0.82, 0.005),
+    // Semantic
+    error:           '#F2B8B5',
+    errorContainer:  dark ? '#8C1D18' : '#F9DEDC',
+    // Custom
+    star: '#F5C518',
+  };
+};
+
+// ─── ICON (Material Symbols) ─────────────────────────────────────────────────
+const Icon = ({ name, size = 24, fill = 0, weight = 400, color, style }) => (
+  <span className="material-symbols-rounded" style={{
+    fontSize: size,
+    color: color || 'inherit',
+    fontVariationSettings: `'FILL' ${fill}, 'wght' ${weight}, 'GRAD' 0, 'opsz' 24`,
+    ...style,
+  }}>{name}</span>
+);
+
+// ─── M3 FILTER CHIP ──────────────────────────────────────────────────────────
+// Spec: height 32dp, when selected shows leading check icon, filled with secondaryContainer-ish
+const FilterChip = ({ label, selected, onClick, theme }) => (
+  <button
+    onClick={onClick}
+    className="m3-interactive"
+    style={{
+      height: 32,
+      padding: selected ? '0 16px 0 8px' : '0 16px',
+      borderRadius: 8,
+      border: selected ? 'none' : `1px solid ${theme.outline}`,
+      background: selected ? theme.secondaryContainer || theme.surfaceContainerHighest : 'transparent',
+      color: selected ? theme.onSurface : theme.onSurfaceVariant,
+      display: 'inline-flex', alignItems: 'center', gap: 8,
+      cursor: 'pointer',
+      fontFamily: 'inherit',
+      ...ty(TYPE.labelLarge),
+      transition: 'background 0.15s ease, padding 0.15s ease',
+    }}
+  >
+    {selected && <Icon name="check" size={18} color={theme.onSurface} />}
+    {label}
+  </button>
+);
+
+// ─── M3 ICON BUTTON (48dp touch target) ──────────────────────────────────────
+const IconButton = ({ icon, onClick, theme, color, tooltip, filled = 0, style = {} }) => (
+  <button
+    onClick={onClick}
+    aria-label={tooltip}
+    className="m3-interactive"
+    style={{
+      width: 48, height: 48, borderRadius: 24,
+      background: 'transparent', border: 'none',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: color || theme.onSurfaceVariant,
+      ...style,
+    }}
+  >
+    <Icon name={icon} size={24} fill={filled} />
+  </button>
+);
+
+// ─── FAVORITE ICON BUTTON (special — with scrim bg for poster overlay) ───────
+const FavoriteButton = ({ isFavorite, onClick, theme, variant = 'scrim', size = 'normal' }) => {
+  const [anim, setAnim] = useState(false);
+  const handle = (e) => {
+    e.stopPropagation();
+    setAnim(true); setTimeout(() => setAnim(false), 400);
+    onClick();
+  };
+  const dim = size === 'small' ? 40 : 48; // STILL ≥40 in small; main is 48
+  const bg = variant === 'scrim' ? 'rgba(0,0,0,0.45)' : 'transparent';
+  const iconColor = isFavorite
+    ? (variant === 'scrim' ? '#FFB4D0' : theme.primary)
+    : (variant === 'scrim' ? '#FFFFFF' : theme.onSurfaceVariant);
+  return (
+    <button
+      onClick={handle}
+      aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+      aria-pressed={isFavorite}
+      className="m3-interactive"
+      style={{
+        width: dim, height: dim, borderRadius: dim / 2,
+        background: bg, border: 'none',
+        backdropFilter: variant === 'scrim' ? 'blur(6px)' : 'none',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transform: anim ? 'scale(1.25)' : 'scale(1)',
+        transition: 'transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)',
+      }}
+    >
+      <Icon name="favorite" size={size === 'small' ? 20 : 24} fill={isFavorite ? 1 : 0} color={iconColor}/>
+    </button>
+  );
+};
+
+// ─── FAKE TMDB DATA ──────────────────────────────────────────────────────────
+const MOVIES = [
+  { id: 1, title: "Duna: Parte Dois", rating: 8.4, year: 2024, genres: ["Ficção Científica", "Aventura"], poster: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg", overview: "Paul Atreides une forças com Chani e os Fremen enquanto busca vingança contra os conspiradores que destruíram sua família." },
+  { id: 2, title: "Oppenheimer", rating: 8.3, year: 2023, genres: ["Drama", "História"], poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg", overview: "A história do cientista americano J. Robert Oppenheimer e seu papel no desenvolvimento da bomba atômica." },
+  { id: 3, title: "Pobres Criaturas", rating: 7.9, year: 2023, genres: ["Romance", "Fantasia"], poster: "https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg", overview: "A incrível evolução da jovem Bella Baxter, trazida de volta à vida pelo brilhante e pouco ortodoxo cientista Dr. Godwin Baxter." },
+  { id: 4, title: "Barbie", rating: 7.0, year: 2023, genres: ["Comédia", "Fantasia"], poster: "https://image.tmdb.org/t/p/w500/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg", overview: "Barbie e Ken vivem vidas perfeitas na Barbielândia. Quando iniciam uma jornada para o mundo real, descobrem que encontrar alegria nem sempre é fácil." },
+  { id: 5, title: "The Substance", rating: 7.4, year: 2024, genres: ["Terror", "Ficção Científica"], poster: "https://image.tmdb.org/t/p/w500/lqoMzCcZYEFK729d6qzt349fB4o.jpg", overview: "Uma celebridade de Hollywood em declínio usa uma droga misteriosa que cria uma versão mais jovem de si mesma." },
+  { id: 6, title: "Deadpool & Wolverine", rating: 7.7, year: 2024, genres: ["Ação", "Comédia"], poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg", overview: "Deadpool e Wolverine unem forças em uma aventura no multiverso que muda tudo para o MCU." },
+  { id: 7, title: "Gladiador II", rating: 7.2, year: 2024, genres: ["Ação", "Drama"], poster: "https://image.tmdb.org/t/p/w500/f9LkstMoTqnGBlI2eGnGLlbXfyR.jpg", overview: "Lucius é forçado a entrar no Coliseu após a conquista de sua casa por generais tiranos." },
+  { id: 8, title: "Alien: Romulus", rating: 7.3, year: 2024, genres: ["Terror", "Ficção Científica"], poster: "https://image.tmdb.org/t/p/w500/b33nnKl1GSFbao4l3fZDDqsMx0F.jpg", overview: "Um grupo de jovens colonizadores do espaço enfrenta a forma de vida mais aterrorizante do universo." },
+  { id: 9, title: "O Brutalista", rating: 7.9, year: 2024, genres: ["Drama", "História"], poster: "https://image.tmdb.org/t/p/w500/czDrBfGWqtCxNdNriBr9TqrFJiR.jpg", overview: "Um arquiteto judeu-húngaro foge da Europa pós-guerra para a América, e tenta reconstruir sua vida." },
+  { id: 10, title: "Conclave", rating: 7.4, year: 2024, genres: ["Drama", "Mistério"], poster: "https://image.tmdb.org/t/p/w500/m5hUQm5KJQY7OCXQ4sClBWADzqw.jpg", overview: "Após a morte do Papa, os cardeais se reúnem em segredo para eleger um novo líder da Igreja Católica." },
+  { id: 11, title: "Nosferatu", rating: 7.2, year: 2024, genres: ["Terror", "Romance"], poster: "https://image.tmdb.org/t/p/w500/5qGIxdEO841C0tdY8vKPk4BM6jI.jpg", overview: "Uma releitura do clássico filme de terror sobre uma jovem obcecada por um vampiro da Transilvânia." },
+  { id: 12, title: "Anora", rating: 7.5, year: 2024, genres: ["Comédia", "Drama"], poster: "https://image.tmdb.org/t/p/w500/vZGyvVN5dKCBMkQStFrFhpJkPMF.jpg", overview: "Uma jovem dançarina de Manhattan se casa impulsivamente com o filho de um oligarca russo." },
+];
+
+// ─── M3 CARD — Filled variant with media ─────────────────────────────────────
+// Proper M3 card: media on top, content (text + actions) below in a padded area.
+// Shape = medium (12dp), elevation 0 (filled), surface = surfaceContainerHighest
+const MovieCard = ({ movie, theme, isFavorite, onFavorite, onOpen }) => {
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <div
+      onClick={() => onOpen(movie)}
+      className="m3-interactive"
+      style={{
+        borderRadius: 12, overflow: 'hidden',
+        background: theme.surfaceContainerHighest,
+        color: theme.onSurface,
+        display: 'flex', flexDirection: 'column',
+      }}
+    >
+      {/* Media */}
+      <div style={{ position: 'relative', aspectRatio: '2/3', background: theme.surfaceContainer }}>
+        {!imgError ? (
+          <img
+            src={movie.poster}
+            alt=""
+            onError={() => setImgError(true)}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="movie" size={40} color={theme.onSurfaceVariant}/>
+          </div>
+        )}
+
+        {/* Favorite — top right, 48dp target */}
+        <div style={{ position: 'absolute', top: 4, right: 4 }}>
+          <FavoriteButton isFavorite={isFavorite} onClick={() => onFavorite(movie.id)} theme={theme} variant="scrim" />
+        </div>
+
+        {/* Rating chip — bottom left on media (M3 assist-chip style) */}
+        <div style={{
+          position: 'absolute', bottom: 8, left: 8,
+          display: 'inline-flex', alignItems: 'center', gap: 3,
+          height: 24, padding: '0 8px',
+          borderRadius: 6,
+          background: 'rgba(0,0,0,0.7)',
+          backdropFilter: 'blur(6px)',
+        }}>
+          <Icon name="star" size={14} fill={1} color={theme.star} />
+          <span style={{ ...ty(TYPE.labelMedium), color: '#fff' }}>{movie.rating.toFixed(1)}</span>
+        </div>
+      </div>
+
+      {/* Content — proper M3 card padding (16dp) */}
+      <div style={{ padding: '12px 12px 14px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{
+          ...ty(TYPE.titleSmall),
+          color: theme.onSurface,
+          overflow: 'hidden', textOverflow: 'ellipsis',
+          display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',
+        }}>{movie.title}</div>
+        <div style={{ ...ty(TYPE.bodySmall), color: theme.onSurfaceVariant }}>{movie.year}</div>
+      </div>
+    </div>
+  );
+};
+
+// ─── SKELETON (M3 loading shimmer) ───────────────────────────────────────────
+const SkeletonCard = ({ theme }) => (
+  <div style={{ borderRadius: 12, overflow: 'hidden', background: theme.surfaceContainerHighest }}>
+    <div style={{ aspectRatio: '2/3', background: theme.surfaceContainer, position: 'relative', overflow: 'hidden' }}>
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `linear-gradient(90deg, transparent 0%, ${theme.dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'} 50%, transparent 100%)`,
+        animation: 'shimmer 1.6s infinite',
+      }}/>
+    </div>
+    <div style={{ padding: '12px 12px 14px' }}>
+      <div style={{ height: 14, width: '70%', borderRadius: 4, background: theme.surfaceContainer, marginBottom: 6 }}/>
+      <div style={{ height: 10, width: '35%', borderRadius: 4, background: theme.surfaceContainer }}/>
+    </div>
+  </div>
+);
+
+// ─── OFFLINE BANNER (M3 inverse surface) ─────────────────────────────────────
+const OfflineBanner = ({ theme, visible }) => (
+  <div style={{
+    display: 'flex', alignItems: 'center', gap: 12,
+    background: theme.dark ? '#4A2800' : '#FFEBCD',
+    color: theme.dark ? '#FFDCBA' : '#3D2500',
+    padding: '12px 16px',
+    overflow: 'hidden',
+    maxHeight: visible ? 48 : 0,
+    opacity: visible ? 1 : 0,
+    transition: 'max-height 0.3s ease, opacity 0.3s ease',
+  }}>
+    <Icon name="signal_wifi_off" size={20} color="currentColor"/>
+    <span style={{ ...ty(TYPE.bodyMedium) }}>Sem conexão — exibindo cache</span>
+  </div>
+);
+
+// ─── ERROR / EMPTY STATE (reusable, M3 spec) ────────────────────────────────
+// Full-screen empty/error pattern:
+//   80dp icon container → titleLarge headline → bodyMedium support →
+//   Filled Button (retry) + optional Text Button (secondary)
+const ErrorState = ({ theme, variant = 'generic', onRetry, onSecondary, secondaryLabel }) => {
+  const config = {
+    network: {
+      icon: 'signal_wifi_connected_no_internet_4',
+      headline: 'Sem conexão',
+      body: 'Verifique sua conexão com a internet e tente novamente.',
+    },
+    generic: {
+      icon: 'error',
+      headline: 'Algo deu errado',
+      body: 'Não foi possível carregar os filmes agora. Tente de novo em instantes.',
+    },
+    timeout: {
+      icon: 'schedule',
+      headline: 'Tempo esgotado',
+      body: 'A requisição demorou demais. Verifique sua conexão e tente novamente.',
+    },
+    server: {
+      icon: 'cloud_off',
+      headline: 'Servidor indisponível',
+      body: 'Nossos servidores estão com problemas. Já estamos trabalhando nisso.',
+    },
+  }[variant];
+
+  const [retrying, setRetrying] = useState(false);
+  const handleRetry = () => {
+    setRetrying(true);
+    setTimeout(() => { setRetrying(false); onRetry && onRetry(); }, 900);
+  };
+
+  return (
+    <div style={{
+      flex: 1, display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '24px 32px 64px', gap: 16, textAlign: 'center',
+      background: theme.surface,
+    }}>
+      <div style={{
+        width: 80, height: 80, borderRadius: 40,
+        background: theme.surfaceContainerHigh,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        marginBottom: 8,
+      }}>
+        <Icon name={config.icon} size={40} color={theme.onSurfaceVariant}/>
+      </div>
+      <div style={{ ...ty(TYPE.titleLarge), color: theme.onSurface }}>
+        {config.headline}
+      </div>
+      <div style={{ ...ty(TYPE.bodyMedium), color: theme.onSurfaceVariant, maxWidth: 280, lineHeight: 1.5 }}>
+        {config.body}
+      </div>
+      <button
+        onClick={handleRetry}
+        disabled={retrying}
+        className="m3-interactive"
+        style={{
+          marginTop: 12,
+          height: 40, padding: '0 24px',
+          borderRadius: 20,
+          background: theme.primary,
+          color: theme.onPrimary,
+          border: 'none',
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          fontFamily: 'inherit',
+          ...ty(TYPE.labelLarge),
+          cursor: retrying ? 'default' : 'pointer',
+          opacity: retrying ? 0.7 : 1,
+          transition: 'opacity 0.2s ease',
+        }}
+      >
+        <Icon name="refresh" size={18}
+          style={{ animation: retrying ? 'spin 0.9s linear infinite' : 'none' }}/>
+        {retrying ? 'Carregando…' : 'Tentar novamente'}
+      </button>
+      {onSecondary && (
+        <button onClick={onSecondary} className="m3-interactive" style={{
+          height: 40, padding: '0 12px',
+          borderRadius: 20, background: 'transparent',
+          color: theme.primary, border: 'none',
+          fontFamily: 'inherit', ...ty(TYPE.labelLarge),
+          cursor: 'pointer',
+        }}>{secondaryLabel || 'Ver offline'}</button>
+      )}
+    </div>
+  );
+};
+
+// ─── HOME SCREEN ─────────────────────────────────────────────────────────────
+const HomeScreen = ({ theme, favorites, onToggleFavorite, onOpenDetail, offline, showFab, errorState, onClearError }) => {
+  const [filter, setFilter] = useState('popular');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
+  const searchRef = useRef(null);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 900);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen) setTimeout(() => searchRef.current?.focus(), 100);
+  }, [searchOpen]);
+
+  // 300ms debounce
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  const onScroll = (e) => setScrolled(e.target.scrollTop > 4);
+
+  const displayed = filter === 'favorites'
+    ? MOVIES.filter(m => favorites.has(m.id))
+    : debouncedQuery
+      ? MOVIES.filter(m => m.title.toLowerCase().includes(debouncedQuery.toLowerCase()))
+      : MOVIES;
+
+  // Top App Bar gets tonal elevation on scroll (M3 spec)
+  const appBarBg = scrolled ? theme.surfaceContainer : theme.surface;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: theme.surface }}>
+      {/* M3 Small Top App Bar — 64dp */}
+      <div style={{
+        background: appBarBg,
+        transition: 'background 0.2s ease',
+        zIndex: 2,
+      }}>
+        {searchOpen ? (
+          // Search mode — M3 search bar pattern
+          <div style={{ display: 'flex', alignItems: 'center', padding: '8px', gap: 4, height: 64 }}>
+            <IconButton icon="arrow_back" theme={theme} color={theme.onSurface}
+              onClick={() => { setSearchOpen(false); setQuery(''); }} tooltip="Fechar busca"/>
+            <input
+              ref={searchRef}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Buscar filmes"
+              style={{
+                flex: 1, background: 'none', border: 'none', outline: 'none',
+                ...ty(TYPE.bodyLarge), color: theme.onSurface,
+                fontFamily: 'inherit',
+              }}
+            />
+            {query && (
+              <IconButton icon="close" theme={theme} color={theme.onSurfaceVariant}
+                onClick={() => setQuery('')} tooltip="Limpar"/>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', padding: '8px 4px 8px 16px', height: 64 }}>
+            <span style={{ flex: 1, ...ty(TYPE.titleLarge), color: theme.onSurface }}>
+              Filmes
+            </span>
+            <IconButton icon="search" theme={theme} onClick={() => setSearchOpen(true)} tooltip="Buscar"/>
+          </div>
+        )}
+
+        {/* Filter chips row (hidden in search mode) — 8dp horizontal gap, 16dp padding */}
+        {!searchOpen && (
+          <div style={{ display: 'flex', gap: 8, padding: '0 16px 12px', overflowX: 'auto' }}>
+            <FilterChip label="Popular" selected={filter === 'popular'}
+              onClick={() => setFilter('popular')} theme={theme}/>
+            <FilterChip label={`Favoritos${favorites.size > 0 ? ` · ${favorites.size}` : ''}`}
+              selected={filter === 'favorites'} onClick={() => setFilter('favorites')} theme={theme}/>
+          </div>
+        )}
+      </div>
+
+      {/* Offline banner */}
+      <OfflineBanner theme={theme} visible={offline}/>
+
+      {/* Full-screen error state (no cache) */}
+      {errorState && errorState !== 'none' ? (
+        <ErrorState theme={theme} variant={errorState} onRetry={onClearError}/>
+      ) : (
+      /* Grid */
+      <div ref={scrollRef} onScroll={onScroll} style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 96px', position: 'relative' }}>
+        {loading ? (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} theme={theme}/>)}
+          </div>
+        ) : filter === 'favorites' && displayed.length === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '64px 32px', gap: 16 }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: 40,
+              background: theme.surfaceContainerHigh,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Icon name="favorite" size={40} color={theme.onSurfaceVariant}/>
+            </div>
+            <div style={{ ...ty(TYPE.titleMedium), color: theme.onSurface, textAlign: 'center' }}>
+              Nenhum favorito ainda
+            </div>
+            <div style={{ ...ty(TYPE.bodyMedium), color: theme.onSurfaceVariant, textAlign: 'center', maxWidth: 240 }}>
+              Toque no coração dos filmes para salvá-los
+            </div>
+          </div>
+        ) : debouncedQuery && displayed.length === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '64px 32px', gap: 12 }}>
+            <Icon name="search_off" size={48} color={theme.onSurfaceVariant}/>
+            <div style={{ ...ty(TYPE.titleMedium), color: theme.onSurface }}>Sem resultados</div>
+            <div style={{ ...ty(TYPE.bodyMedium), color: theme.onSurfaceVariant, textAlign: 'center' }}>
+              Nada encontrado para "{debouncedQuery}"
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {displayed.map(movie => (
+              <MovieCard
+                key={movie.id} movie={movie} theme={theme}
+                isFavorite={favorites.has(movie.id)}
+                onFavorite={onToggleFavorite}
+                onOpen={onOpenDetail}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+      )}
+
+      {/* M3 FAB — primary, 56dp, shuffle random */}
+      {showFab && !searchOpen && !loading && (!errorState || errorState === 'none') && (
+        <button
+          onClick={() => onOpenDetail(MOVIES[Math.floor(Math.random() * MOVIES.length)])}
+          aria-label="Filme aleatório"
+          className="m3-interactive"
+          style={{
+            position: 'absolute', bottom: 16, right: 16,
+            width: 56, height: 56, borderRadius: 16,
+            background: theme.primaryContainer,
+            color: theme.onPrimaryContainer,
+            border: 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)',
+            zIndex: 3,
+          }}
+        >
+          <Icon name="shuffle" size={24}/>
+        </button>
+      )}
+    </div>
+  );
+};
+
+// ─── DETAIL SCREEN ───────────────────────────────────────────────────────────
+const DetailScreen = ({ movie, theme, isFavorite, onToggleFavorite, onBack }) => {
+  const [favAnim, setFavAnim] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+
+  const handleFav = () => {
+    setFavAnim(true); setTimeout(() => setFavAnim(false), 400);
+    onToggleFavorite(movie.id);
+  };
+
+  const onScroll = (e) => setScrolled(e.target.scrollTop > 140);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: theme.surface, position: 'relative' }}>
+      {/* Top app bar that fades in on scroll */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, zIndex: 3,
+        height: 64,
+        display: 'flex', alignItems: 'center', padding: '8px 4px',
+        background: scrolled ? theme.surfaceContainer : 'transparent',
+        transition: 'background 0.25s ease',
+      }}>
+        <IconButton icon="arrow_back" theme={theme}
+          color={scrolled ? theme.onSurface : '#fff'}
+          onClick={onBack} tooltip="Voltar"
+          style={{ background: scrolled ? 'transparent' : 'rgba(0,0,0,0.35)' }}/>
+        <div style={{
+          flex: 1, marginLeft: 8,
+          ...ty(TYPE.titleLarge),
+          color: theme.onSurface,
+          opacity: scrolled ? 1 : 0,
+          transition: 'opacity 0.25s ease',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>{movie.title}</div>
+        <div style={{ paddingRight: 4 }}>
+          <IconButton
+            icon="favorite" filled={isFavorite ? 1 : 0}
+            color={isFavorite ? (scrolled ? theme.primary : '#FFB4D0') : (scrolled ? theme.onSurfaceVariant : '#fff')}
+            theme={theme} onClick={handleFav} tooltip="Favoritar"
+            style={{
+              background: scrolled ? 'transparent' : 'rgba(0,0,0,0.35)',
+              transform: favAnim ? 'scale(1.25)' : 'scale(1)',
+              transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.25s ease',
+            }}/>
+        </div>
+      </div>
+
+      {/* Scrollable content */}
+      <div onScroll={onScroll} style={{ flex: 1, overflowY: 'auto' }}>
+        {/* Hero */}
+        <div style={{ position: 'relative', height: 360 }}>
+          {!imgLoaded && <div style={{ position: 'absolute', inset: 0, background: theme.surfaceContainerHigh }}/>}
+          <img
+            src={movie.poster} alt=""
+            onLoad={() => setImgLoaded(true)}
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+              opacity: imgLoaded ? 1 : 0, transition: 'opacity 0.35s ease',
+            }}
+          />
+          {/* Scrim for top bar legibility */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 120,
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%)',
+          }}/>
+          {/* Bottom fade into surface */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: 120,
+            background: `linear-gradient(to top, ${theme.surface} 0%, transparent 100%)`,
+          }}/>
+        </div>
+
+        {/* Content area */}
+        <div style={{ padding: '0 24px 120px', marginTop: -16, position: 'relative' }}>
+          {/* Title — M3 headlineSmall */}
+          <h1 style={{ ...ty(TYPE.headlineSmall), color: theme.onSurface, marginBottom: 4 }}>
+            {movie.title}
+          </h1>
+          {/* Meta row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, ...ty(TYPE.bodyMedium), color: theme.onSurfaceVariant }}>
+            <span>{movie.year}</span>
+            <span style={{ opacity: 0.4 }}>•</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <Icon name="star" size={16} fill={1} color={theme.star}/>
+              <span style={{ color: theme.onSurface, fontWeight: 500 }}>{movie.rating.toFixed(1)}</span>
+              <span>/ 10</span>
+            </span>
+          </div>
+
+          {/* Genres — M3 Assist Chips (32dp, outlined) */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 28 }}>
+            {movie.genres.map(g => (
+              <span key={g} style={{
+                height: 32, padding: '0 16px',
+                display: 'inline-flex', alignItems: 'center',
+                borderRadius: 8,
+                border: `1px solid ${theme.outline}`,
+                color: theme.onSurfaceVariant,
+                ...ty(TYPE.labelLarge),
+              }}>{g}</span>
+            ))}
+          </div>
+
+          {/* Section header */}
+          <div style={{ ...ty(TYPE.titleMedium), color: theme.onSurface, marginBottom: 8 }}>Sinopse</div>
+          <div style={{ ...ty(TYPE.bodyMedium), color: theme.onSurfaceVariant, lineHeight: 1.6, marginBottom: 32 }}>
+            {movie.overview}
+          </div>
+
+          {/* Primary CTA — M3 Filled Button, 40dp height, pill */}
+          <button
+            onClick={handleFav}
+            className="m3-interactive"
+            style={{
+              width: '100%', height: 56, borderRadius: 28,
+              background: isFavorite ? theme.surfaceContainerHighest : theme.primary,
+              color: isFavorite ? theme.onSurface : theme.onPrimary,
+              border: isFavorite ? `1px solid ${theme.outline}` : 'none',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              fontFamily: 'inherit',
+              ...ty(TYPE.labelLarge),
+              transition: 'background 0.2s ease',
+              transform: favAnim ? 'scale(0.98)' : 'scale(1)',
+            }}
+          >
+            <Icon name="favorite" size={18} fill={isFavorite ? 1 : 0}
+              color={isFavorite ? theme.primary : theme.onPrimary}/>
+            {isFavorite ? 'Favoritado' : 'Adicionar aos favoritos'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── ROOT ────────────────────────────────────────────────────────────────────
+const App = () => {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const theme = makeTheme(tweaks.darkMode, tweaks.accentHue);
+
+  const [favorites, setFavorites] = useState(new Set([2, 5]));
+  const [detailMovie, setDetailMovie] = useState(null);
+  const [transitioning, setTransitioning] = useState(false);
+  const [direction, setDirection] = useState('forward');
+
+  const toggleFavorite = useCallback((id) => {
+    setFavorites(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }, []);
+
+  const openDetail = (m) => {
+    setDirection('forward'); setTransitioning(true);
+    setTimeout(() => { setDetailMovie(m); setTransitioning(false); }, 180);
+  };
+  const closeDetail = () => {
+    setDirection('back'); setTransitioning(true);
+    setTimeout(() => { setDetailMovie(null); setTransitioning(false); }, 180);
+  };
+
+  const screenStyle = {
+    width: '100%', height: '100%',
+    opacity: transitioning ? 0 : 1,
+    transform: transitioning
+      ? (direction === 'forward' ? 'translateX(24px)' : 'translateX(-24px)')
+      : 'translateX(0)',
+    transition: transitioning ? 'none' : 'opacity 0.22s cubic-bezier(0.2,0,0,1), transform 0.22s cubic-bezier(0.2,0,0,1)',
+  };
+
+  return (
+    <div className="page-wrapper">
+      <style>{`
+        @keyframes shimmer { 0% { transform: translateX(-100%) } 100% { transform: translateX(100%) } }
+        @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+      `}</style>
+
+      {/* Phone 1 — Home */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} data-screen-label="01 Home">
+        <AndroidDevice theme={theme.dark ? 'dark' : 'light'} accentColor={theme.primary}>
+          <div style={screenStyle}>
+            <HomeScreen
+              theme={theme} favorites={favorites}
+              onToggleFavorite={toggleFavorite}
+              onOpenDetail={openDetail}
+              offline={tweaks.offline}
+              showFab={tweaks.showFab}
+              errorState={tweaks.errorState}
+              onClearError={() => setTweak('errorState', 'none')}
+            />
+          </div>
+        </AndroidDevice>
+        <div className="screen-label">Home</div>
+      </div>
+
+      {/* Phone 2 — Detail */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} data-screen-label="02 Detail">
+        <AndroidDevice theme={theme.dark ? 'dark' : 'light'} accentColor={theme.primary}>
+          <div style={screenStyle}>
+            {detailMovie ? (
+              <DetailScreen
+                movie={detailMovie} theme={theme}
+                isFavorite={favorites.has(detailMovie.id)}
+                onToggleFavorite={toggleFavorite}
+                onBack={closeDetail}
+              />
+            ) : (
+              <div style={{
+                height: '100%', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                background: theme.surface, gap: 16, padding: 32, textAlign: 'center',
+              }}>
+                <div style={{
+                  width: 80, height: 80, borderRadius: 40,
+                  background: theme.surfaceContainerHigh,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Icon name="movie" size={40} color={theme.onSurfaceVariant}/>
+                </div>
+                <div style={{ ...ty(TYPE.titleMedium), color: theme.onSurface }}>
+                  Selecione um filme
+                </div>
+                <div style={{ ...ty(TYPE.bodyMedium), color: theme.onSurfaceVariant, maxWidth: 240 }}>
+                  Toque em um poster na Home para ver o detalhe
+                </div>
+              </div>
+            )}
+          </div>
+        </AndroidDevice>
+        <div className="screen-label">Detail</div>
+      </div>
+
+      <TweaksPanel>
+        <TweakSection label="Material 3 Theme">
+          <TweakToggle id="darkMode" label="Dark mode"/>
+          <TweakSlider id="accentHue" label="Primary hue (Material You)" min={0} max={360} step={15}/>
+        </TweakSection>
+        <TweakSection label="Estado">
+          <TweakToggle id="offline" label="Banner offline (com cache)"/>
+          <TweakToggle id="showFab" label="Mostrar FAB (shuffle)"/>
+          <TweakRadio id="errorState" label="Tela de erro" options={[
+            { value: 'none', label: 'Nenhum (grid normal)' },
+            { value: 'network', label: 'Sem conexão' },
+            { value: 'generic', label: 'Erro genérico' },
+            { value: 'timeout', label: 'Timeout' },
+            { value: 'server', label: 'Servidor indisponível' },
+          ]}/>
+        </TweakSection>
+      </TweaksPanel>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

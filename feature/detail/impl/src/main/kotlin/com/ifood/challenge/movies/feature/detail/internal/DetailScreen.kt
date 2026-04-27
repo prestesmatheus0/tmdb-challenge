@@ -33,9 +33,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -45,12 +45,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.ifood.challenge.movies.core.designsystem.component.ErrorState
 import com.ifood.challenge.movies.core.designsystem.component.ErrorVariant
+import com.ifood.challenge.movies.core.designsystem.component.ShimmerBox
+import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
+import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
+import com.ifood.challenge.movies.core.network.BackdropSize
 import com.ifood.challenge.movies.core.network.ImageUrlBuilder
+import com.ifood.challenge.movies.core.network.PosterSize
+import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 import org.koin.compose.koinInject
 
@@ -60,25 +69,26 @@ internal fun DetailScreen(
     uiState: DetailUiState,
     onBack: () -> Unit,
     onFavoriteToggle: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     imageUrlBuilder: ImageUrlBuilder = koinInject(),
 ) {
     val scrollState = rememberScrollState()
     val density = LocalDensity.current
-    val collapseThresholdPx = remember(density) { with(density) { 300.dp.toPx() } }
+    val collapseThresholdPx = remember(density) { with(density) { (Dimens.HeroImageHeight - 60.dp).toPx() } }
     val collapseAlpha by remember(scrollState) {
         derivedStateOf { (scrollState.value / collapseThresholdPx).coerceIn(0f, 1f) }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        when {
-            uiState.error -> ErrorState(
+        when (uiState) {
+            DetailUiState.Loading -> DetailSkeleton()
+            DetailUiState.Error -> ErrorState(
                 variant = ErrorVariant.Generic,
-                onRetry = {},
+                onRetry = onRetry,
                 modifier = Modifier.fillMaxSize(),
             )
-            uiState.isLoading && uiState.detail == null -> DetailSkeleton()
-            uiState.detail != null -> DetailContent(
+            is DetailUiState.Success -> DetailContent(
                 detail = uiState.detail,
                 isFavorite = uiState.isFavorite,
                 onFavoriteToggle = onFavoriteToggle,
@@ -88,9 +98,9 @@ internal fun DetailScreen(
         }
 
         CollapsingTopBar(
-            title = uiState.detail?.title.orEmpty(),
-            isFavorite = uiState.isFavorite,
-            showFavorite = uiState.detail != null,
+            title = (uiState as? DetailUiState.Success)?.detail?.title.orEmpty(),
+            isFavorite = (uiState as? DetailUiState.Success)?.isFavorite == true,
+            showFavorite = uiState is DetailUiState.Success,
             collapseAlpha = collapseAlpha,
             onBack = onBack,
             onFavoriteToggle = onFavoriteToggle,
@@ -115,20 +125,20 @@ private fun CollapsingTopBar(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = collapseAlpha))
             .statusBarsPadding()
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .padding(horizontal = MaterialTheme.spacing.xs, vertical = MaterialTheme.spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         IconButton(
             onClick = onBack,
             modifier = Modifier
-                .size(48.dp)
+                .size(Dimens.IconButtonSize)
                 .clip(CircleShape)
                 .background(Color.Black.copy(alpha = circleAlpha)),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar",
+                contentDescription = stringResource(R.string.detail_back),
                 tint = iconTint,
             )
         }
@@ -141,7 +151,7 @@ private fun CollapsingTopBar(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = MaterialTheme.spacing.xs)
                 .alpha(collapseAlpha),
         )
 
@@ -149,18 +159,20 @@ private fun CollapsingTopBar(
             IconButton(
                 onClick = onFavoriteToggle,
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(Dimens.IconButtonSize)
                     .clip(CircleShape)
                     .background(Color.Black.copy(alpha = circleAlpha)),
             ) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = if (isFavorite) "Remover dos favoritos" else "Adicionar aos favoritos",
+                    contentDescription = stringResource(
+                        if (isFavorite) R.string.detail_remove_favorite else R.string.detail_add_favorite,
+                    ),
                     tint = iconTint,
                 )
             }
         } else {
-            Spacer(modifier = Modifier.size(48.dp))
+            Spacer(modifier = Modifier.size(Dimens.IconButtonSize))
         }
     }
 }
@@ -175,7 +187,7 @@ private fun DetailContent(
     scrollState: ScrollState,
 ) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
-        Box(modifier = Modifier.fillMaxWidth().height(360.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().height(Dimens.HeroImageHeight)) {
             AsyncImage(
                 model = imageUrlBuilder.poster(detail.posterPath),
                 contentDescription = null,
@@ -185,7 +197,7 @@ private fun DetailContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
+                    .height(Dimens.HeroGradientTopHeight)
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent),
@@ -196,7 +208,7 @@ private fun DetailContent(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(80.dp)
+                    .height(Dimens.HeroGradientBottomHeight)
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface),
@@ -208,8 +220,8 @@ private fun DetailContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 120.dp),
+                .padding(horizontal = MaterialTheme.spacing.lg)
+                .padding(bottom = Dimens.ContentBottomPadding),
         ) {
             Text(
                 text = detail.title,
@@ -218,7 +230,7 @@ private fun DetailContent(
 
             val tagline = detail.tagline
             if (!tagline.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.xxs))
                 Text(
                     text = tagline,
                     style = MaterialTheme.typography.bodyMedium,
@@ -226,18 +238,18 @@ private fun DetailContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.xs))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xs),
             ) {
                 detail.releaseDate?.take(4)?.let { year ->
                     Text(text = year, style = MaterialTheme.typography.bodyMedium)
                 }
                 detail.runtimeMinutes?.let { runtime ->
                     Text(
-                        text = "· ${runtime}min",
+                        text = stringResource(R.string.detail_runtime, runtime),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -247,7 +259,7 @@ private fun DetailContent(
                         imageVector = Icons.Default.Star,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(Dimens.IconSizeSm),
                     )
                     Text(
                         text = " ${"%.1f".format(detail.voteAverage)}",
@@ -257,8 +269,8 @@ private fun DetailContent(
             }
 
             if (detail.genres.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.sm))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xs)) {
                     detail.genres.forEach { genre ->
                         AssistChip(
                             onClick = {},
@@ -270,12 +282,12 @@ private fun DetailContent(
             }
 
             if (detail.overview.isNotBlank()) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.md))
                 Text(
-                    text = "Sinopse",
+                    text = stringResource(R.string.detail_synopsis),
                     style = MaterialTheme.typography.titleMedium,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.xs))
                 Text(
                     text = detail.overview,
                     style = MaterialTheme.typography.bodyMedium,
@@ -283,33 +295,33 @@ private fun DetailContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.lg))
 
             if (isFavorite) {
                 OutlinedButton(
                     onClick = onFavoriteToggle,
-                    shape = RoundedCornerShape(28.dp),
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(Dimens.ButtonCornerRadius),
+                    modifier = Modifier.fillMaxWidth().height(Dimens.ButtonHeight),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp),
+                        modifier = Modifier.padding(end = MaterialTheme.spacing.xs),
                     )
-                    Text("Remover dos favoritos")
+                    Text(stringResource(R.string.detail_remove_favorite))
                 }
             } else {
                 Button(
                     onClick = onFavoriteToggle,
-                    shape = RoundedCornerShape(28.dp),
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(Dimens.ButtonCornerRadius),
+                    modifier = Modifier.fillMaxWidth().height(Dimens.ButtonHeight),
                 ) {
                     Icon(
                         imageVector = Icons.Default.FavoriteBorder,
                         contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp),
+                        modifier = Modifier.padding(end = MaterialTheme.spacing.xs),
                     )
-                    Text("Adicionar aos favoritos")
+                    Text(stringResource(R.string.detail_add_favorite))
                 }
             }
         }
@@ -319,27 +331,87 @@ private fun DetailContent(
 @Composable
 private fun DetailSkeleton() {
     Column(modifier = Modifier.fillMaxSize()) {
-        Box(
+        ShimmerBox(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(360.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .height(Dimens.HeroImageHeight),
         )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = MaterialTheme.spacing.lg, vertical = MaterialTheme.spacing.md),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
         ) {
             repeat(5) {
-                Box(
+                ShimmerBox(
                     modifier = Modifier
                         .fillMaxWidth(if (it == 0) 0.7f else 1f)
-                        .height(16.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                        .height(Dimens.SkeletonLineHeight)
+                        .clip(RoundedCornerShape(Dimens.SkeletonCornerRadius)),
                 )
             }
         }
+    }
+}
+
+private val PREVIEW_DETAIL = MovieDetail(
+    id = 27205,
+    title = "Inception",
+    posterPath = null,
+    backdropPath = null,
+    overview = "Dom Cobb é um ladrão habilidoso na perigosa arte de extrair segredos do subconsciente.",
+    voteAverage = 8.8,
+    releaseDate = "2010-07-16",
+    runtimeMinutes = 148,
+    tagline = "Sua mente é o palco do crime",
+            popularity = 0.0,
+    genres = listOf(Genre(28, "Ação"), Genre(878, "Ficção Científica")),
+)
+
+private val PREVIEW_IMAGE_BUILDER = object : ImageUrlBuilder {
+    override fun poster(path: String?, size: PosterSize) = ""
+
+    override fun backdrop(path: String?, size: BackdropSize) = ""
+}
+
+@PreviewThemes
+@Composable
+private fun DetailScreenLoadingPreview() {
+    IfoodMoviesTheme {
+        DetailScreen(
+            uiState = DetailUiState.Loading,
+            onBack = {},
+            onFavoriteToggle = {},
+            onRetry = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
+    }
+}
+
+@PreviewThemes
+@Composable
+private fun DetailScreenErrorPreview() {
+    IfoodMoviesTheme {
+        DetailScreen(
+            uiState = DetailUiState.Error,
+            onBack = {},
+            onFavoriteToggle = {},
+            onRetry = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
+    }
+}
+
+@PreviewThemes
+@Composable
+private fun DetailScreenSuccessPreview() {
+    IfoodMoviesTheme {
+        DetailScreen(
+            uiState = DetailUiState.Success(PREVIEW_DETAIL, isFavorite = false),
+            onBack = {},
+            onFavoriteToggle = {},
+            onRetry = {},
+            imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
+        )
     }
 }

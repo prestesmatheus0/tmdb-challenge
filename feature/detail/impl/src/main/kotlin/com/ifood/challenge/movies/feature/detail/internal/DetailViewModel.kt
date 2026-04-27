@@ -1,13 +1,15 @@
 package com.ifood.challenge.movies.feature.detail.internal
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 import com.ifood.challenge.movies.domain.movies.usecase.FetchMovieDetailUseCase
-import com.ifood.challenge.movies.domain.movies.usecase.ObserveIsFavoriteUseCase
-import com.ifood.challenge.movies.domain.movies.usecase.ObserveMovieDetailUseCase
+import com.ifood.challenge.movies.domain.movies.usecase.GetIsFavoriteUseCase
+import com.ifood.challenge.movies.domain.movies.usecase.GetMovieDetailUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -15,50 +17,74 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 internal class DetailViewModel(
-    private val movieId: Int,
+    savedStateHandle: SavedStateHandle,
     private val fetchDetail: FetchMovieDetailUseCase,
-    observeDetail: ObserveMovieDetailUseCase,
-    observeIsFavorite: ObserveIsFavoriteUseCase,
+    observeDetail: GetMovieDetailUseCase,
+    observeIsFavorite: GetIsFavoriteUseCase,
     private val setFavorite: SetFavoriteUseCase,
 ) : ViewModel() {
 
-    private val isLoading = MutableStateFlow(true)
-    private val error = MutableStateFlow(false)
+    private val movieId: Int = requireNotNull(savedStateHandle[KEY_MOVIE_ID]) {
+        "DetailViewModel requires '$KEY_MOVIE_ID' in SavedStateHandle"
+    }
+
+    private companion object {
+        const val KEY_MOVIE_ID = "movieId"
+    }
+
+    private val isFetching = MutableStateFlow(true)
+    private val fetchFailed = MutableStateFlow(false)
 
     val uiState = combine(
         observeDetail(movieId),
         observeIsFavorite(movieId),
-        isLoading,
-        error,
-    ) { detail, isFavorite, loading, err ->
-        DetailUiState(
-            detail = detail,
-            isFavorite = isFavorite,
-            isLoading = loading,
-            error = err,
-        )
+        isFetching,
+        fetchFailed,
+    ) { detail, isFavorite, fetching, failed ->
+        when {
+            detail != null -> DetailUiState.Success(detail, isFavorite)
+            failed && !fetching -> DetailUiState.Error
+            else -> DetailUiState.Loading
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = DetailUiState(),
+        initialValue = DetailUiState.Loading,
     )
 
     init {
+        loadDetail()
+    }
+
+    fun onRetry() {
+        if (isFetching.value) return
+        fetchFailed.value = false
+        isFetching.value = true
+        loadDetail()
+    }
+
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    private fun loadDetail() {
         viewModelScope.launch {
-            runCatching { fetchDetail(movieId) }
-                .onSuccess { isLoading.value = false }
-                .onFailure {
-                    isLoading.value = false
-                    error.value = true
-                }
+            try {
+                fetchDetail(movieId)
+                isFetching.value = false
+            } catch (e: CancellationException) {
+                // Coroutine cooperative cancellation: must propagate, not treat as fetch failure.
+                throw e
+            } catch (e: Exception) {
+                // Any other failure (IO, HTTP, parse) collapses into "show error UI + allow retry".
+                // Specific exception types are re-thrown by retrofit/OkHttp; we map them all to UI state.
+                isFetching.value = false
+                fetchFailed.value = true
+            }
         }
     }
 
     fun onFavoriteToggle() {
-        val detail = uiState.value.detail ?: return
-        val isFavorite = uiState.value.isFavorite
+        val current = uiState.value as? DetailUiState.Success ?: return
         viewModelScope.launch {
-            setFavorite(detail.toMovie(), isFavorite = !isFavorite)
+            setFavorite(current.detail.toMovie(), isFavorite = !current.isFavorite)
         }
     }
 }
@@ -71,5 +97,5 @@ private fun MovieDetail.toMovie() = Movie(
     overview = overview,
     voteAverage = voteAverage,
     releaseDate = releaseDate,
-    popularity = 0.0,
+    popularity = popularity,
 )

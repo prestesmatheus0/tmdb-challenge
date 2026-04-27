@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
@@ -31,13 +32,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.ifood.challenge.movies.core.designsystem.R
+import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
+import com.ifood.challenge.movies.core.designsystem.theme.Dimens
+import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.MotionTokens
+import com.ifood.challenge.movies.core.designsystem.theme.spacing
 
 @Composable
 fun MovieCard(
@@ -84,13 +93,13 @@ fun MovieCard(
                     modifier =
                         Modifier
                             .align(Alignment.TopEnd)
-                            .padding(8.dp),
+                            .padding(MaterialTheme.spacing.xs),
                 )
             }
 
             Column(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.sm, vertical = MaterialTheme.spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xxs),
             ) {
                 Text(
                     text = title,
@@ -139,7 +148,7 @@ private fun FavoriteButton(
         onClick = onToggle,
         modifier =
             modifier
-                .size(40.dp)
+                .size(Dimens.FavoriteButtonSize)
                 .clip(MaterialTheme.shapes.extraLarge)
                 .background(Color.Black.copy(alpha = 0.35f))
                 .scale(scale.value)
@@ -154,9 +163,9 @@ private fun FavoriteButton(
                 if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
             contentDescription =
                 if (isFavorite) {
-                    "Remover $title dos favoritos"
+                    stringResource(R.string.movie_card_remove_favorite, title)
                 } else {
-                    "Favoritar $title"
+                    stringResource(R.string.movie_card_add_favorite, title)
                 },
             tint = if (isFavorite) MaterialTheme.colorScheme.primary else Color.White,
         )
@@ -167,13 +176,13 @@ private fun FavoriteButton(
 private fun RatingRow(rating: Double) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xxs),
     ) {
         Icon(
             imageVector = Icons.Filled.Star,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(14.dp),
+            modifier = Modifier.size(Dimens.IconSizeXs),
         )
         Text(
             text = "%.1f".format(rating),
@@ -187,4 +196,28 @@ object MovieCardTestTags {
     fun root(title: String) = "movie_card_$title"
 
     fun favorite(title: String) = "movie_card_favorite_$title"
+}
+
+private class FavoriteParam : PreviewParameterProvider<Boolean> {
+    override val values = sequenceOf(false, true)
+}
+
+@PreviewThemes
+@Composable
+private fun MovieCardPreview(
+    @PreviewParameter(FavoriteParam::class) isFavorite: Boolean,
+) {
+    IfoodMoviesTheme {
+        Box(modifier = Modifier.padding(MaterialTheme.spacing.md)) {
+            MovieCard(
+                title = "Inception",
+                posterUrl = null,
+                rating = 8.8,
+                isFavorite = isFavorite,
+                onClick = {},
+                onFavoriteToggle = {},
+                modifier = Modifier.width(180.dp),
+            )
+        }
+    }
 }
