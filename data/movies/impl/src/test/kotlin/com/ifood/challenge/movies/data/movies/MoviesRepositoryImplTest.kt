@@ -203,8 +203,6 @@ class MoviesRepositoryImplTest {
 
     @Test
     fun `popularPagingFlow expoe Flow do Pager`() = runTest {
-        // Smoke test: building the flow does not throw with mocked DB/DAO; values flow only when collected
-        // by Paging machinery, which is exercised in PagingSourceTest.
         every { movieDao.pagingSource() } returns mockk(relaxed = true)
         val flow = repository.popularPagingFlow()
         assertTrue(flow !== null)

@@ -42,8 +42,6 @@ class UseCasesTest {
         popularity = 100.0,
     )
 
-    // GetGenresUseCase
-
     @Test
     fun `GetGenresUseCase delega para repository fetchGenres`() = runTest {
         val genres = listOf(Genre(28, "Action"), Genre(12, "Adventure"))
@@ -54,8 +52,6 @@ class UseCasesTest {
         assertEquals(genres, result)
         coVerify(exactly = 1) { repository.fetchGenres() }
     }
-
-    // GetMovieDetailUseCase
 
     @Test
     fun `GetMovieDetailUseCase emite MovieDetail do repository`() = runTest {
@@ -83,8 +79,6 @@ class UseCasesTest {
         }
     }
 
-    // FetchMovieDetailUseCase
-
     @Test
     fun `FetchMovieDetailUseCase chama repository fetchAndCacheDetail`() = runTest {
         coEvery { repository.fetchAndCacheDetail(1) } returns Unit
@@ -93,8 +87,6 @@ class UseCasesTest {
 
         coVerify(exactly = 1) { repository.fetchAndCacheDetail(1) }
     }
-
-    // GetIsFavoriteUseCase
 
     @Test
     fun `GetIsFavoriteUseCase emite true quando favorito`() = runTest {
@@ -116,8 +108,6 @@ class UseCasesTest {
         }
     }
 
-    // SetFavoriteUseCase
-
     @Test
     fun `SetFavoriteUseCase chama setFavorite com isFavorite true`() = runTest {
         coEvery { repository.setFavorite(movie, true) } returns Unit
@@ -136,8 +126,6 @@ class UseCasesTest {
         coVerify(exactly = 1) { repository.setFavorite(movie, false) }
     }
 
-    // GetPopularMoviesUseCase
-
     @Test
     fun `GetPopularMoviesUseCase delega para repository popularPagingFlow`() = runTest {
         val expected = flowOf(PagingData.empty<Movie>())
@@ -147,8 +135,6 @@ class UseCasesTest {
 
         assertEquals(expected, result)
     }
-
-    // GetNowPlayingMoviesUseCase
 
     @Test
     fun `GetNowPlayingMoviesUseCase delega para repository nowPlayingPagingFlow`() = runTest {
@@ -160,8 +146,6 @@ class UseCasesTest {
         assertEquals(expected, result)
     }
 
-    // GetMoviesByGenreUseCase
-
     @Test
     fun `GetMoviesByGenreUseCase delega com genreId`() = runTest {
         val expected = flowOf(PagingData.empty<Movie>())
@@ -171,8 +155,6 @@ class UseCasesTest {
 
         assertEquals(expected, result)
     }
-
-    // GetMoviesByQueryUseCase
 
     @Test
     fun `GetMoviesByQueryUseCase delega com query`() = runTest {
@@ -184,8 +166,6 @@ class UseCasesTest {
         assertEquals(expected, result)
     }
 
-    // GetFavoriteMoviesUseCase
-
     @Test
     fun `GetFavoriteMoviesUseCase emite lista do repository`() = runTest {
         val movies = listOf(movie)
@@ -196,8 +176,6 @@ class UseCasesTest {
             awaitComplete()
         }
     }
-
-    // GetFavoriteIdsUseCase
 
     @Test
     fun `GetFavoriteIdsUseCase emite Set de ids do repository`() = runTest {

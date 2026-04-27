@@ -23,8 +23,6 @@ class PagingSourceTest {
 
     private val apiService = mockk<TmdbApiService>()
 
-    // ── NowPlayingPagingSource ──
-
     @Test
     fun nowPlaying_firstPage_returnsPrevKeyNull() = runTest {
         coEvery { apiService.nowPlaying(1) } returns makeResponse(page = 1, totalPages = 3)
@@ -70,8 +68,6 @@ class PagingSourceTest {
 
         assertIs<LoadResult.Error<Int, *>>(result)
     }
-
-    // ── DiscoverPagingSource ──
 
     @Test
     fun discover_firstPage_returnsPrevKeyNull() = runTest {
@@ -127,8 +123,6 @@ class PagingSourceTest {
         assertEquals(8.3, movie.voteAverage)
     }
 
-    // ── SearchPagingSource ──
-
     @Test
     fun search_firstPage_returnsPrevKeyNull() = runTest {
         coEvery { apiService.searchMovies(query = "inception", page = 1) } returns makeResponse(page = 1, totalPages = 4)
@@ -161,8 +155,6 @@ class PagingSourceTest {
 
         assertIs<LoadResult.Error<Int, *>>(result)
     }
-
-    // ── getRefreshKey ──
 
     @Test
     fun nowPlaying_getRefreshKey_returnsNullWhenNoAnchor() {
@@ -213,7 +205,7 @@ class PagingSourceTest {
             config = PagingConfig(pageSize = 20),
             leadingPlaceholderCount = 0,
         )
-        // closest page has prevKey=1, so refresh key = prevKey + 1 = 2
+
         assertEquals(2, source.getRefreshKey(state))
     }
 

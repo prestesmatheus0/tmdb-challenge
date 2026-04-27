@@ -75,7 +75,7 @@ class DetailScreenTest {
     @Test
     fun success_showsTitle() {
         setContent(uiState = DetailUiState.Success(TEST_DETAIL, isFavorite = false))
-        // title appears in both collapsing bar and content; verify at least 2 nodes exist
+
         val nodes = composeTestRule.onAllNodesWithText("Inception")
         nodes[0].assertExists()
     }

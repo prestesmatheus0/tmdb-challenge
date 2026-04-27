@@ -118,7 +118,6 @@ class DetailViewModelTest {
 
         assertIs<DetailUiState.Error>(viewModel.uiState.value)
 
-        // fix fetch and retry
         fetchResult = Result.success(Unit)
         detailFlow.value = TEST_DETAIL
         viewModel.onRetry()

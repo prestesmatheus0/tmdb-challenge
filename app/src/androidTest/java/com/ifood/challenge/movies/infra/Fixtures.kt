@@ -1,6 +1,5 @@
 package com.ifood.challenge.movies.infra
 
-/** Canned TMDB-shaped JSON responses for instrumentation tests. */
 object Fixtures {
     fun popularPage(
         page: Int = 1,

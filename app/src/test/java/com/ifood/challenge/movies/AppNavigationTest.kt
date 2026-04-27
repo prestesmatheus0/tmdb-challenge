@@ -7,19 +7,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Test
 
-/**
- * Type-safe Navigation 3 routes: data class + @Serializable.
- * Verifies routes round-trip through Kotlinx Serialization (used by Compose nav under the hood)
- * and that arguments are preserved.
- */
 class AppNavigationTest {
     @Test
     fun homeRoute_isSerializableSingleton() {
-        // HomeRoute is `object` with no args. Round-trip must yield the same singleton instance,
-        // so two navigation pushes don't create distinct backstack entries.
         val json = Json.encodeToString(HomeRoute.serializer(), HomeRoute)
         val decoded = Json.decodeFromString(HomeRoute.serializer(), json)
-        // Same Kotlin object identity (kotlin objects deserialize back to the singleton)
+
         assertSame(HomeRoute, decoded)
     }
 

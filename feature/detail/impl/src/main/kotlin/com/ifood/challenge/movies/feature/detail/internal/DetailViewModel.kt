@@ -70,11 +70,8 @@ internal class DetailViewModel(
                 fetchDetail(movieId)
                 isFetching.value = false
             } catch (e: CancellationException) {
-                // Coroutine cooperative cancellation: must propagate, not treat as fetch failure.
                 throw e
             } catch (e: Exception) {
-                // Any other failure (IO, HTTP, parse) collapses into "show error UI + allow retry".
-                // Specific exception types are re-thrown by retrofit/OkHttp; we map them all to UI state.
                 isFetching.value = false
                 fetchFailed.value = true
             }

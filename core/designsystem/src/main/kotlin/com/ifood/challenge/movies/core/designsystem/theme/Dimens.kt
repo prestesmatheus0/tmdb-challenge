@@ -2,10 +2,6 @@ package com.ifood.challenge.movies.core.designsystem.theme
 
 import androidx.compose.ui.unit.dp
 
-/**
- * Component-specific dimension tokens not covered by [Spacing].
- * Use [Spacing] for padding/margins; use these for fixed sizes.
- */
 object Dimens {
     val HeroImageHeight = 360.dp
     val HeroGradientTopHeight = 120.dp

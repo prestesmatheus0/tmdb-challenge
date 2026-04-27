@@ -14,23 +14,10 @@ import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 
-/**
- * Stops the production Koin graph started by [com.ifood.challenge.movies.IfoodMoviesApp]
- * and rebuilds it with test substitutes for [NetworkConfig] (→ MockWebServer) and
- * [MoviesDatabase] (→ in-memory Room).
- *
- * IMPORTANT: we do NOT load the production `databaseKoinModule` here, otherwise Koin
- * raises `DefinitionOverrideException` at startup since both modules define `single<MoviesDatabase>`.
- * The production `appKoinModule` defines `NetworkConfig`; we let the later [testNetworkModule]
- * override it (Koin 4 allows override-by-order when modules are passed in sequence).
- *
- * Order with other rules: declare AFTER [MockWebServerRule] so its base URL is available.
- */
 class AppKoinTestRule(
     private val mockWebServer: MockWebServerRule,
 ) : ExternalResource() {
     override fun before() {
-        // tear down whatever Application started
         if (GlobalContext.getOrNull() != null) stopKoin()
 
         startKoin {
@@ -42,8 +29,6 @@ class AppKoinTestRule(
                 domainMoviesKoinModule,
                 homeKoinModule,
                 detailKoinModule,
-                // Replacements (NOT alongside) for production database + appKoinModule's NetworkConfig.
-                // appKoinModule defines NetworkConfig; the testNetworkModule that follows overrides it.
                 testDatabaseModule(),
                 appKoinModule,
                 testNetworkModule(mockWebServer.baseUrl),

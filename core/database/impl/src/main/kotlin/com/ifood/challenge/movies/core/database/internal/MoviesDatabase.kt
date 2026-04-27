@@ -35,12 +35,6 @@ abstract class MoviesDatabase : RoomDatabase() {
     companion object {
         const val NAME = "ifood_movies.db"
 
-        /**
-         * v1 → v2: enrich `favorite_movies` with backdrop_path, overview, release_date, popularity.
-         *
-         * SQLite ALTER TABLE only supports ADD COLUMN, so we add the new columns with
-         * sensible defaults. Existing rows preserve their movieId/title/posterPath/voteAverage/addedAt.
-         */
         val MIGRATION_1_2 =
             object : Migration(1, 2) {
                 override fun migrate(db: SupportSQLiteDatabase) {
@@ -51,7 +45,6 @@ abstract class MoviesDatabase : RoomDatabase() {
                 }
             }
 
-        /** v2 → v3: add popularity to movie_details so favorites kept after Detail-favorite preserve rank. */
         val MIGRATION_2_3 =
             object : Migration(2, 3) {
                 override fun migrate(db: SupportSQLiteDatabase) {

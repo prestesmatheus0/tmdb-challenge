@@ -16,14 +16,6 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
-/**
- * Configuration change survival via [androidx.lifecycle.SavedStateHandle].
- *
- * `activityRule.scenario.recreate()` mimics rotation by destroying and reinstantiating the
- * Activity. ViewModels backed by SavedStateHandle restore their state automatically.
- *
- * Default happy-path routes pre-registered in [MockWebServerRule.before].
- */
 @RunWith(AndroidJUnit4::class)
 class ConfigChangeTest {
     private val mockWebServer = MockWebServerRule()
@@ -43,13 +35,11 @@ class ConfigChangeTest {
 
         compose.activityRule.scenario.recreate()
 
-        // SavedStateHandle restored: chip remains visible after rebuild.
         compose.waitUntilTextDisplayed("Mais Recentes")
     }
 
     @Test
     fun rotation_preservesSearchQuery() {
-        // Use specific search response so we can detect it after rotation.
         mockWebServer.route("/search/movie", Fixtures.searchResults("inception"))
 
         compose.waitUntilTextDisplayed("Inception")
@@ -80,7 +70,6 @@ class ConfigChangeTest {
 
         compose.activityRule.scenario.recreate()
 
-        // Room (DB-backed) survives Activity recreation independent of SavedStateHandle.
         compose.waitUntilTextDisplayed("Favoritos · 1")
     }
 }

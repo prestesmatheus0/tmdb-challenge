@@ -13,7 +13,7 @@ import com.ifood.challenge.movies.data.movies.internal.mapper.toEntity
 import kotlinx.coroutines.CancellationException
 
 private const val STARTING_PAGE = 1
-private const val CACHE_TIMEOUT_MS = 30 * 60 * 1000L // 30 min
+private const val CACHE_TIMEOUT_MS = 30 * 60 * 1000L
 
 @OptIn(ExperimentalPagingApi::class)
 internal class MoviesRemoteMediator(

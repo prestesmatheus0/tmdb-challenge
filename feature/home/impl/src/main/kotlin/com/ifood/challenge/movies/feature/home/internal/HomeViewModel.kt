@@ -55,8 +55,6 @@ internal class HomeViewModel(
         ),
     )
 
-    // initialValue mirrors the SavedStateHandle-restored state so that recomposition
-    // immediately after process death sees the persisted filter/searchQuery, not the default.
     val uiState = _uiState.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -73,8 +71,7 @@ internal class HomeViewModel(
         ) { query, filter -> query to filter }
             .flatMapLatest { (query, filter) ->
                 when {
-                    // Favorites are served from a separate flow (`favoriteMovies`),
-                    // so the paging stream stops emitting until the user picks another filter.
+
                     filter is HomeFilter.Favorites -> emptyFlow()
                     query.length >= SEARCH_MIN_LENGTH -> getMoviesByQuery(query)
                     filter is HomeFilter.Genre -> getMoviesByGenre(filter.genreId)

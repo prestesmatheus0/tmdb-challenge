@@ -11,12 +11,6 @@ import com.ifood.challenge.movies.core.network.NetworkConfig
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-/**
- * Koin modules used by androidTest to replace network and database singletons.
- *
- * - Network points at [MockWebServerRule] base URL.
- * - Database is an in-memory Room instance, fresh per test.
- */
 fun testNetworkModule(baseUrl: String): Module =
     module {
         single<NetworkConfig> {

@@ -297,7 +297,6 @@ class HomeViewModelTest {
         viewModel.onSearchToggle()
         viewModel.onSearchQueryChange("inception")
 
-        // simulate process recreation: same SavedStateHandle, new ViewModel instance
         val handle = SavedStateHandle().apply {
             this["home_search_query"] = "inception"
             this["home_search_active"] = true
