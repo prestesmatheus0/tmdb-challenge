@@ -34,3 +34,19 @@ google-services.json
 *.hprof
 .kotlin/
 build-logic/.kotlin/
+
+# Claude / AI assistant harness state
+.claude/
+.claire/
+.aider*
+CLAUDE.md
+.cursor*
+.windsurf*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*~
+.vscode/
+*.swp
+*.swo
