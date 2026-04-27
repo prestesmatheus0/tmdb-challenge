@@ -2,8 +2,6 @@ package com.ifood.challenge.movies.journey
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -14,6 +12,8 @@ import com.ifood.challenge.movies.MainActivity
 import com.ifood.challenge.movies.infra.AppKoinTestRule
 import com.ifood.challenge.movies.infra.Fixtures
 import com.ifood.challenge.movies.infra.MockWebServerRule
+import com.ifood.challenge.movies.infra.waitUntilTextDisplayed
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -23,7 +23,12 @@ import org.junit.runner.RunWith
  * End-to-end user journeys: real Activity, real Koin (with overrides), real Room (in-memory),
  * fake network via MockWebServer.
  *
- * Each test boots the app from `MainActivity`, exercises a flow, and asserts on visible UI.
+ * Patterns follow https://developer.android.com/develop/ui/compose/testing :
+ *  - `createAndroidComposeRule<MainActivity>()` to launch the real Activity
+ *  - Finders: `onNodeWithText`, `onNodeWithContentDescription` (semantics-based)
+ *  - Actions: `performClick`, `performTextInput`, `performScrollTo`
+ *  - Synchronization: `waitUntil { … }` (wrapped in `waitUntilTextDisplayed` helper)
+ *  - Assertions: `assertIsDisplayed()` after every wait
  */
 @RunWith(AndroidJUnit4::class)
 class UserJourneyTest {
@@ -32,8 +37,7 @@ class UserJourneyTest {
     private val koin = AppKoinTestRule(mockWebServer)
     private val compose = createAndroidComposeRule<MainActivity>()
 
-    // Order matters: MockWebServer must start before Koin (Koin reads its base URL),
-    // and the Activity must be launched after Koin is wired.
+    // Order matters: MockWebServer starts first (Koin reads baseUrl), Activity launches last.
     @get:Rule
     val chain: RuleChain = RuleChain
         .outerRule(mockWebServer)
@@ -45,10 +49,7 @@ class UserJourneyTest {
         mockWebServer.route("/movie/popular", Fixtures.popularPage())
         mockWebServer.route("/genre/movie/list", Fixtures.genres())
 
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Inception").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onAllNodesWithText("Inception").onFirst().assertIsDisplayed()
+        compose.waitUntilTextDisplayed("Inception")
     }
 
     @Test
@@ -57,16 +58,8 @@ class UserJourneyTest {
         mockWebServer.route("/movie/27205", Fixtures.movieDetail(movieId = 27205))
         mockWebServer.route("/genre/movie/list", Fixtures.genres())
 
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Inception").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onAllNodesWithText("Inception").onFirst().performClick()
-
-        // Detail shows synopsis text
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Sinopse").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithText("Sinopse").performScrollTo().assertIsDisplayed()
+        compose.waitUntilTextDisplayed("Inception").performClick()
+        compose.waitUntilTextDisplayed("Sinopse").performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -75,26 +68,12 @@ class UserJourneyTest {
         mockWebServer.route("/movie/27205", Fixtures.movieDetail(movieId = 27205))
         mockWebServer.route("/genre/movie/list", Fixtures.genres())
 
-        // navigate to detail
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Inception").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onAllNodesWithText("Inception").onFirst().performClick()
-
-        // favorite
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Adicionar aos favoritos").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithText("Adicionar aos favoritos").performScrollTo().performClick()
-
-        // back
+        compose.waitUntilTextDisplayed("Inception").performClick()
+        compose.waitUntilTextDisplayed("Adicionar aos favoritos")
+            .performScrollTo()
+            .performClick()
         compose.onNodeWithContentDescription("Voltar").performClick()
-
-        // chip with count
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Favoritos · 1").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithText("Favoritos · 1").assertIsDisplayed()
+        compose.waitUntilTextDisplayed("Favoritos · 1")
     }
 
     @Test
@@ -103,16 +82,10 @@ class UserJourneyTest {
         mockWebServer.route("/genre/movie/list", Fixtures.genres())
         mockWebServer.route("/search/movie", Fixtures.searchResults("matrix"))
 
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Inception").fetchSemanticsNodes().isNotEmpty()
-        }
+        compose.waitUntilTextDisplayed("Inception")
         compose.onNodeWithContentDescription("Buscar").performClick()
         compose.onNodeWithText("Buscar filmes…").performTextInput("matrix")
-
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("matrix Match").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onAllNodesWithText("matrix Match").onFirst().assertIsDisplayed()
+        compose.waitUntilTextDisplayed("matrix Match")
     }
 
     @Test
@@ -121,25 +94,13 @@ class UserJourneyTest {
         mockWebServer.route("/genre/movie/list", Fixtures.genres())
         mockWebServer.route("/discover/movie", Fixtures.popularPage())
 
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Ação").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithText("Ação").performClick()
+        compose.waitUntilTextDisplayed("Ação").performClick()
+        compose.waitUntilTextDisplayed("Inception")
 
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Inception").fetchSemanticsNodes().isNotEmpty()
-        }
-        // Verify discover was hit
-        var hitDiscover = false
-        repeat(mockWebServer.server.requestCount) {
-            val req = mockWebServer.server.takeRequest(0, java.util.concurrent.TimeUnit.MILLISECONDS) ?: return@repeat
-            if (req.path?.startsWith("/discover/movie") == true) hitDiscover = true
-        }
-        // takeRequest drained at this point — alternative: inspect via dispatcher counters.
-        // We accept the implicit assertion that the grid populated through /discover/movie.
-        org.junit.Assert.assertTrue(
-            "Discover endpoint was wired and grid populated",
-            compose.onAllNodesWithText("Inception").fetchSemanticsNodes().isNotEmpty(),
+        // Verify the right endpoint was actually hit (not just the grid populated).
+        assertTrue(
+            "Expected /discover/movie request, got: ${mockWebServer.requestedPaths}",
+            mockWebServer.hasRequestStartingWith("/discover/movie"),
         )
     }
 
@@ -148,17 +109,12 @@ class UserJourneyTest {
         mockWebServer.route("/genre/movie/list", Fixtures.genres())
         mockWebServer.routeError("/movie/popular", code = 500)
 
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Tentar novamente").fetchSemanticsNodes().isNotEmpty()
-        }
+        compose.waitUntilTextDisplayed("Tentar novamente")
 
-        // swap to success and retry
+        // Swap to success then retry
         mockWebServer.route("/movie/popular", Fixtures.popularPage())
         compose.onNodeWithText("Tentar novamente").performClick()
 
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithText("Inception").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onAllNodesWithText("Inception").onFirst().assertIsDisplayed()
+        compose.waitUntilTextDisplayed("Inception")
     }
 }

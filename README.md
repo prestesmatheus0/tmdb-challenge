@@ -27,6 +27,30 @@ Detekt + ktlint configurados. Rodar antes de commit:
 
 Config Detekt em `config/detekt/detekt.yml`. Inclui regras Compose via `io.nlopez.compose.rules:detekt`.
 
+## Cobertura de testes
+
+Kover ativo em todos os módulos. Roda + abre relatório:
+```bash
+./gradlew koverHtmlReport && open build/reports/kover/html/index.html
+./gradlew koverXmlReport   # CI
+```
+
+Cobertura atual (LINE): **84.9%** focada em use cases / VMs / repositories / mappers (network/UI infra excluídos do alvo).
+
+| Camada | % |
+|--------|---|
+| Domain models | 100% |
+| Use case impls | 100% |
+| Mappers | 100% |
+| Detail VM/Screen | 94% |
+| Designsystem components | 91% |
+| Repository | 87% |
+| Home VM/Screen | 84% |
+| DTOs | 81% |
+| PagingSources | 52% |
+
+Ajustes em `build.gradle.kts` (root) — Kover excludes para Room-gerado, Composables, BuildConfig, theme tokens.
+
 ## CI
 
 GitHub Actions em `.github/workflows/ci.yml`. Roda em cada PR + push para `main`:
@@ -127,6 +151,13 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 ```bash
 ./gradlew :app:connectedDebugAndroidTest
 ```
+
+Os testes E2E seguem o [guia oficial Compose Testing](https://developer.android.com/develop/ui/compose/testing):
+- `createAndroidComposeRule<MainActivity>()` para Activity real
+- Finders semânticos: `onNodeWithText`, `onNodeWithContentDescription`, `onNodeWithTag`
+- Sincronização: `composeTestRule.waitUntil { … }` (encapsulado em `waitUntilTextDisplayed` para reduzir boilerplate)
+- Asserções explícitas após cada wait (`assertIsDisplayed()`)
+- Ordem de regras via `RuleChain` (MockWebServer → Koin → Activity)
 
 **Padrão de fakes:** uso de `fun interface` permite criar fakes via lambda em vez de mocks. Exemplo:
 ```kotlin

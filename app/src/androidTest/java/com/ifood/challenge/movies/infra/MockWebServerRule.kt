@@ -18,12 +18,18 @@ class MockWebServerRule : ExternalResource() {
     val baseUrl: String get() = server.url("/").toString()
 
     private val routes = mutableMapOf<String, () -> MockResponse>()
+    private val recordedPaths = mutableListOf<String>()
+
+    /** Snapshot of every path the server has dispatched, in order. Reset per test. */
+    val requestedPaths: List<String> get() = recordedPaths.toList()
 
     override fun before() {
         routes.clear()
+        recordedPaths.clear()
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 val path = request.path.orEmpty()
+                synchronized(recordedPaths) { recordedPaths.add(path) }
                 val handler = routes.entries.firstOrNull { (prefix, _) -> path.startsWith(prefix) }
                 return handler?.value?.invoke() ?: MockResponse().setResponseCode(404)
             }
@@ -49,4 +55,8 @@ class MockWebServerRule : ExternalResource() {
     fun routeError(pathPrefix: String, code: Int = 500) {
         routes[pathPrefix] = { MockResponse().setResponseCode(code) }
     }
+
+    /** True if any recorded request started with [pathPrefix]. */
+    fun hasRequestStartingWith(pathPrefix: String): Boolean =
+        synchronized(recordedPaths) { recordedPaths.any { it.startsWith(pathPrefix) } }
 }
