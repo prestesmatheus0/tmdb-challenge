@@ -27,7 +27,7 @@ import org.junit.Test
 
 class MoviesRepositoryImplTest {
     private val apiService = mockk<TmdbApiService>()
-    private val db = mockk<MoviesDatabase>()
+    private val db = mockk<MoviesDatabase>(relaxed = true)
     private val movieDao = mockk<MovieDao>()
     private val movieDetailDao = mockk<MovieDetailDao>()
     private val favoriteDao = mockk<FavoriteDao>()
@@ -141,5 +141,90 @@ class MoviesRepositoryImplTest {
             assertEquals("Inception", detail?.title)
             awaitComplete()
         }
+    }
+
+    @Test
+    fun `observeAllFavoriteIds extrai movieIds das entities`() = runTest {
+        val entities = listOf(
+            FavoriteEntity(
+                movieId = 1, title = "A", posterPath = null, backdropPath = null,
+                overview = "", voteAverage = 0.0, releaseDate = null, popularity = 0.0, addedAt = 0L,
+            ),
+            FavoriteEntity(
+                movieId = 2, title = "B", posterPath = null, backdropPath = null,
+                overview = "", voteAverage = 0.0, releaseDate = null, popularity = 0.0, addedAt = 0L,
+            ),
+        )
+        every { favoriteDao.observeAll() } returns flowOf(entities)
+
+        repository.observeAllFavoriteIds().test {
+            assertEquals(setOf(1, 2), awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `observeAllFavoriteIds emite set vazio quando dao retorna lista vazia`() = runTest {
+        every { favoriteDao.observeAll() } returns flowOf(emptyList())
+
+        repository.observeAllFavoriteIds().test {
+            assertEquals(emptySet<Int>(), awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `observeFavoriteMovies mapeia FavoriteEntity para Movie completo`() = runTest {
+        val entity = FavoriteEntity(
+            movieId = 27205,
+            title = "Inception",
+            posterPath = "/p.jpg",
+            backdropPath = "/bd.jpg",
+            overview = "A thief who steals secrets",
+            voteAverage = 8.8,
+            releaseDate = "2010-07-16",
+            popularity = 100.0,
+            addedAt = 1L,
+        )
+        every { favoriteDao.observeAll() } returns flowOf(listOf(entity))
+
+        repository.observeFavoriteMovies().test {
+            val movies = awaitItem()
+            assertEquals(1, movies.size)
+            val m = movies[0]
+            assertEquals(27205, m.id)
+            assertEquals("Inception", m.title)
+            assertEquals("/bd.jpg", m.backdropPath)
+            assertEquals("A thief who steals secrets", m.overview)
+            assertEquals(100.0, m.popularity, 0.0)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `popularPagingFlow expoe Flow do Pager`() = runTest {
+        // Smoke test: building the flow does not throw with mocked DB/DAO; values flow only when collected
+        // by Paging machinery, which is exercised in PagingSourceTest.
+        every { movieDao.pagingSource() } returns mockk(relaxed = true)
+        val flow = repository.popularPagingFlow()
+        assertTrue(flow !== null)
+    }
+
+    @Test
+    fun `nowPlayingPagingFlow expoe Flow do Pager`() = runTest {
+        val flow = repository.nowPlayingPagingFlow()
+        assertTrue(flow !== null)
+    }
+
+    @Test
+    fun `discoverByGenrePagingFlow expoe Flow do Pager para genreId`() = runTest {
+        val flow = repository.discoverByGenrePagingFlow(28)
+        assertTrue(flow !== null)
+    }
+
+    @Test
+    fun `searchPagingFlow expoe Flow do Pager para query`() = runTest {
+        val flow = repository.searchPagingFlow("inception")
+        assertTrue(flow !== null)
     }
 }

@@ -1,10 +1,17 @@
 package com.ifood.challenge.movies.domain.movies
 
 import app.cash.turbine.test
+import androidx.paging.PagingData
 import com.ifood.challenge.movies.domain.movies.internal.FetchMovieDetailUseCaseImpl
+import com.ifood.challenge.movies.domain.movies.internal.GetFavoriteIdsUseCaseImpl
+import com.ifood.challenge.movies.domain.movies.internal.GetFavoriteMoviesUseCaseImpl
 import com.ifood.challenge.movies.domain.movies.internal.GetGenresUseCaseImpl
 import com.ifood.challenge.movies.domain.movies.internal.GetIsFavoriteUseCaseImpl
 import com.ifood.challenge.movies.domain.movies.internal.GetMovieDetailUseCaseImpl
+import com.ifood.challenge.movies.domain.movies.internal.GetMoviesByGenreUseCaseImpl
+import com.ifood.challenge.movies.domain.movies.internal.GetMoviesByQueryUseCaseImpl
+import com.ifood.challenge.movies.domain.movies.internal.GetNowPlayingMoviesUseCaseImpl
+import com.ifood.challenge.movies.domain.movies.internal.GetPopularMoviesUseCaseImpl
 import com.ifood.challenge.movies.domain.movies.internal.SetFavoriteUseCaseImpl
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
@@ -120,5 +127,79 @@ class UseCasesTest {
         SetFavoriteUseCaseImpl(repository)(movie, isFavorite = false)
 
         coVerify(exactly = 1) { repository.setFavorite(movie, false) }
+    }
+
+    // GetPopularMoviesUseCase
+
+    @Test
+    fun `GetPopularMoviesUseCase delega para repository popularPagingFlow`() = runTest {
+        val expected = flowOf(PagingData.empty<Movie>())
+        every { repository.popularPagingFlow() } returns expected
+
+        val result = GetPopularMoviesUseCaseImpl(repository)()
+
+        assertEquals(expected, result)
+    }
+
+    // GetNowPlayingMoviesUseCase
+
+    @Test
+    fun `GetNowPlayingMoviesUseCase delega para repository nowPlayingPagingFlow`() = runTest {
+        val expected = flowOf(PagingData.empty<Movie>())
+        every { repository.nowPlayingPagingFlow() } returns expected
+
+        val result = GetNowPlayingMoviesUseCaseImpl(repository)()
+
+        assertEquals(expected, result)
+    }
+
+    // GetMoviesByGenreUseCase
+
+    @Test
+    fun `GetMoviesByGenreUseCase delega com genreId`() = runTest {
+        val expected = flowOf(PagingData.empty<Movie>())
+        every { repository.discoverByGenrePagingFlow(28) } returns expected
+
+        val result = GetMoviesByGenreUseCaseImpl(repository)(28)
+
+        assertEquals(expected, result)
+    }
+
+    // GetMoviesByQueryUseCase
+
+    @Test
+    fun `GetMoviesByQueryUseCase delega com query`() = runTest {
+        val expected = flowOf(PagingData.empty<Movie>())
+        every { repository.searchPagingFlow("inception") } returns expected
+
+        val result = GetMoviesByQueryUseCaseImpl(repository)("inception")
+
+        assertEquals(expected, result)
+    }
+
+    // GetFavoriteMoviesUseCase
+
+    @Test
+    fun `GetFavoriteMoviesUseCase emite lista do repository`() = runTest {
+        val movies = listOf(movie)
+        every { repository.observeFavoriteMovies() } returns flowOf(movies)
+
+        GetFavoriteMoviesUseCaseImpl(repository)().test {
+            assertEquals(movies, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    // GetFavoriteIdsUseCase
+
+    @Test
+    fun `GetFavoriteIdsUseCase emite Set de ids do repository`() = runTest {
+        val ids = setOf(1, 2, 3)
+        every { repository.observeAllFavoriteIds() } returns flowOf(ids)
+
+        GetFavoriteIdsUseCaseImpl(repository)().test {
+            assertEquals(ids, awaitItem())
+            awaitComplete()
+        }
     }
 }

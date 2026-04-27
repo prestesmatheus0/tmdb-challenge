@@ -1,7 +1,9 @@
 package com.ifood.challenge.movies.data.movies
 
+import androidx.paging.PagingConfig
 import androidx.paging.PagingSource.LoadParams
 import androidx.paging.PagingSource.LoadResult
+import androidx.paging.PagingState
 import com.ifood.challenge.movies.data.movies.internal.api.TmdbApiService
 import com.ifood.challenge.movies.data.movies.internal.api.dto.MovieDto
 import com.ifood.challenge.movies.data.movies.internal.api.dto.MovieListResponseDto
@@ -158,6 +160,61 @@ class PagingSourceTest {
         val result = source.load(LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
 
         assertIs<LoadResult.Error<Int, *>>(result)
+    }
+
+    // ── getRefreshKey ──
+
+    @Test
+    fun nowPlaying_getRefreshKey_returnsNullWhenNoAnchor() {
+        val source = NowPlayingPagingSource(apiService)
+        val state = PagingState<Int, Movie>(
+            pages = emptyList(),
+            anchorPosition = null,
+            config = PagingConfig(pageSize = 20),
+            leadingPlaceholderCount = 0,
+        )
+        assertNull(source.getRefreshKey(state))
+    }
+
+    @Test
+    fun discover_getRefreshKey_returnsNullWhenNoAnchor() {
+        val source = DiscoverPagingSource(apiService, genreId = 28)
+        val state = PagingState<Int, Movie>(
+            pages = emptyList(),
+            anchorPosition = null,
+            config = PagingConfig(pageSize = 20),
+            leadingPlaceholderCount = 0,
+        )
+        assertNull(source.getRefreshKey(state))
+    }
+
+    @Test
+    fun search_getRefreshKey_returnsNullWhenNoAnchor() {
+        val source = SearchPagingSource(apiService, query = "x")
+        val state = PagingState<Int, Movie>(
+            pages = emptyList(),
+            anchorPosition = null,
+            config = PagingConfig(pageSize = 20),
+            leadingPlaceholderCount = 0,
+        )
+        assertNull(source.getRefreshKey(state))
+    }
+
+    @Test
+    fun nowPlaying_getRefreshKey_derivesFromAnchorPage() = runTest {
+        coEvery { apiService.nowPlaying(2) } returns makeResponse(page = 2, totalPages = 5)
+
+        val source = NowPlayingPagingSource(apiService)
+        val page = source.load(LoadParams.Append(key = 2, loadSize = 20, placeholdersEnabled = false))
+            as LoadResult.Page<Int, Movie>
+        val state = PagingState(
+            pages = listOf(page),
+            anchorPosition = 0,
+            config = PagingConfig(pageSize = 20),
+            leadingPlaceholderCount = 0,
+        )
+        // closest page has prevKey=1, so refresh key = prevKey + 1 = 2
+        assertEquals(2, source.getRefreshKey(state))
     }
 
     private fun makeResponse(page: Int, totalPages: Int) = MovieListResponseDto(

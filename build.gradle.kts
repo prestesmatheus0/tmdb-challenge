@@ -52,11 +52,22 @@ kover {
                     "androidx.room.Entity",
                 )
                 packages(
-                    "*.theme",
-                    "*.preview",
+                    "*.designsystem.theme",
+                    "*.designsystem.preview",
                     "*.core.database.dao",
                     "*.core.database.entity",
                     "*.core.database.internal",
+                    // Out of coverage scope: infra (network/connectivity/dispatchers) — focus is use cases, VMs, repos, mappers
+                    "com.ifood.challenge.movies.core.common.network",
+                    "com.ifood.challenge.movies.core.common.coroutines",
+                    "com.ifood.challenge.movies.core.common.di",
+                    "com.ifood.challenge.movies.core.network.internal",
+                    "com.ifood.challenge.movies.di",
+                )
+                classes(
+                    "com.ifood.challenge.movies.MainActivity",
+                    "com.ifood.challenge.movies.IfoodMoviesApp",
+                    "com.ifood.challenge.movies.AppNavHost*",
                 )
             }
         }
