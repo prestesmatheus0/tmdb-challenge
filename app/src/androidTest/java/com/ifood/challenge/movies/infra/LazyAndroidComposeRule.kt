@@ -29,7 +29,12 @@ class LazyAndroidComposeRule<A : ComponentActivity>(
         composeRule.apply(
             object : Statement() {
                 override fun evaluate() {
-                    try { base.evaluate() } finally { scenario?.close(); scenario = null }
+                    try {
+                        base.evaluate()
+                    } finally {
+                        scenario?.close()
+                        scenario = null
+                    }
                 }
             },
             description,
