@@ -28,6 +28,7 @@ class DetailScreenTest {
 
     private val fakeImageUrlBuilder = object : ImageUrlBuilder {
         override fun poster(path: String?, size: PosterSize) = ""
+
         override fun backdrop(path: String?, size: BackdropSize) = ""
     }
 

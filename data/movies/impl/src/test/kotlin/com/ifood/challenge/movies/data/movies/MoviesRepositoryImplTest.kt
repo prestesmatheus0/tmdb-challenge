@@ -7,11 +7,11 @@ import com.ifood.challenge.movies.core.database.dao.MovieDetailDao
 import com.ifood.challenge.movies.core.database.entity.FavoriteEntity
 import com.ifood.challenge.movies.core.database.entity.MovieDetailEntity
 import com.ifood.challenge.movies.core.database.internal.MoviesDatabase
+import com.ifood.challenge.movies.core.testing.TestDispatcherProvider
 import com.ifood.challenge.movies.data.movies.internal.api.TmdbApiService
 import com.ifood.challenge.movies.data.movies.internal.api.dto.GenreDto
 import com.ifood.challenge.movies.data.movies.internal.api.dto.GenreListResponseDto
 import com.ifood.challenge.movies.data.movies.internal.api.dto.MovieDetailDto
-import com.ifood.challenge.movies.core.testing.TestDispatcherProvider
 import com.ifood.challenge.movies.data.movies.internal.repository.MoviesRepositoryImpl
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import io.mockk.coEvery

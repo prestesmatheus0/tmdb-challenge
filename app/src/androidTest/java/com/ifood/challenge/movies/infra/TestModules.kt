@@ -17,29 +17,31 @@ import org.koin.dsl.module
  * - Network points at [MockWebServerRule] base URL.
  * - Database is an in-memory Room instance, fresh per test.
  */
-fun testNetworkModule(baseUrl: String): Module = module {
-    single<NetworkConfig> {
-        object : NetworkConfig {
-            override val baseUrl: String = baseUrl
-            override val apiKey: String = "test-token"
-            override val imageBaseUrl: String = baseUrl
-            override val language: String = "pt-BR"
-            override val debug: Boolean = true
+fun testNetworkModule(baseUrl: String): Module =
+    module {
+        single<NetworkConfig> {
+            object : NetworkConfig {
+                override val baseUrl: String = baseUrl
+                override val apiKey: String = "test-token"
+                override val imageBaseUrl: String = baseUrl
+                override val language: String = "pt-BR"
+                override val debug: Boolean = true
+            }
         }
     }
-}
 
-fun testDatabaseModule(): Module = module {
-    single<MoviesDatabase> {
-        Room.inMemoryDatabaseBuilder(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            MoviesDatabase::class.java,
-        )
-            .allowMainThreadQueries()
-            .build()
+fun testDatabaseModule(): Module =
+    module {
+        single<MoviesDatabase> {
+            Room.inMemoryDatabaseBuilder(
+                InstrumentationRegistry.getInstrumentation().targetContext,
+                MoviesDatabase::class.java,
+            )
+                .allowMainThreadQueries()
+                .build()
+        }
+        single<MovieDao> { get<MoviesDatabase>().movieDao() }
+        single<MovieDetailDao> { get<MoviesDatabase>().movieDetailDao() }
+        single<FavoriteDao> { get<MoviesDatabase>().favoriteDao() }
+        single<RemoteKeyDao> { get<MoviesDatabase>().remoteKeyDao() }
     }
-    single<MovieDao> { get<MoviesDatabase>().movieDao() }
-    single<MovieDetailDao> { get<MoviesDatabase>().movieDetailDao() }
-    single<FavoriteDao> { get<MoviesDatabase>().favoriteDao() }
-    single<RemoteKeyDao> { get<MoviesDatabase>().remoteKeyDao() }
-}

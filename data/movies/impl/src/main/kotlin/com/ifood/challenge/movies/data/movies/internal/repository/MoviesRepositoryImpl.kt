@@ -5,9 +5,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.ifood.challenge.movies.core.common.coroutines.DispatcherProvider
 import com.ifood.challenge.movies.core.database.dao.FavoriteDao
-import com.ifood.challenge.movies.core.database.dao.MovieDetailDao
 import com.ifood.challenge.movies.core.database.dao.MovieDao
+import com.ifood.challenge.movies.core.database.dao.MovieDetailDao
 import com.ifood.challenge.movies.core.database.internal.MoviesDatabase
 import com.ifood.challenge.movies.data.movies.internal.api.TmdbApiService
 import com.ifood.challenge.movies.data.movies.internal.mapper.toDomain
@@ -17,7 +18,6 @@ import com.ifood.challenge.movies.data.movies.internal.paging.DiscoverPagingSour
 import com.ifood.challenge.movies.data.movies.internal.paging.MoviesRemoteMediator
 import com.ifood.challenge.movies.data.movies.internal.paging.NowPlayingPagingSource
 import com.ifood.challenge.movies.data.movies.internal.paging.SearchPagingSource
-import com.ifood.challenge.movies.core.common.coroutines.DispatcherProvider
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
@@ -37,7 +37,6 @@ internal class MoviesRepositoryImpl(
     private val favoriteDao: FavoriteDao,
     private val dispatchers: DispatcherProvider,
 ) : MoviesRepository {
-
     override fun popularPagingFlow(): Flow<PagingData<Movie>> =
         Pager(
             config = PagingConfig(pageSize = PAGE_SIZE, enablePlaceholders = false),
@@ -63,28 +62,29 @@ internal class MoviesRepositoryImpl(
             pagingSourceFactory = { SearchPagingSource(apiService, query) },
         ).flow
 
-    override fun observeDetail(movieId: Int): Flow<MovieDetail?> =
-        movieDetailDao.observe(movieId).map { it?.toDomain() }
+    override fun observeDetail(movieId: Int): Flow<MovieDetail?> = movieDetailDao.observe(movieId).map { it?.toDomain() }
 
-    override fun observeIsFavorite(movieId: Int): Flow<Boolean> =
-        favoriteDao.observeIsFavorite(movieId)
+    override fun observeIsFavorite(movieId: Int): Flow<Boolean> = favoriteDao.observeIsFavorite(movieId)
 
-    override fun observeAllFavoriteIds(): Flow<Set<Int>> =
-        favoriteDao.observeAll().map { list -> list.map { it.movieId }.toSet() }
+    override fun observeAllFavoriteIds(): Flow<Set<Int>> = favoriteDao.observeAll().map { list -> list.map { it.movieId }.toSet() }
 
-    override fun observeFavoriteMovies(): Flow<List<Movie>> =
-        favoriteDao.observeAll().map { list -> list.map { it.toDomain() } }
+    override fun observeFavoriteMovies(): Flow<List<Movie>> = favoriteDao.observeAll().map { list -> list.map { it.toDomain() } }
 
-    override suspend fun fetchGenres(): List<Genre> = withContext(dispatchers.io) {
-        apiService.genres().genres.map { it.toDomain() }
-    }
+    override suspend fun fetchGenres(): List<Genre> =
+        withContext(dispatchers.io) {
+            apiService.genres().genres.map { it.toDomain() }
+        }
 
-    override suspend fun fetchAndCacheDetail(movieId: Int) = withContext(dispatchers.io) {
-        val detail = apiService.movieDetail(movieId)
-        movieDetailDao.upsert(detail.toEntity())
-    }
+    override suspend fun fetchAndCacheDetail(movieId: Int) =
+        withContext(dispatchers.io) {
+            val detail = apiService.movieDetail(movieId)
+            movieDetailDao.upsert(detail.toEntity())
+        }
 
-    override suspend fun setFavorite(movie: Movie, isFavorite: Boolean) = withContext(dispatchers.io) {
+    override suspend fun setFavorite(
+        movie: Movie,
+        isFavorite: Boolean,
+    ) = withContext(dispatchers.io) {
         if (isFavorite) {
             favoriteDao.upsert(movie.toFavoriteEntity())
         } else {

@@ -2,20 +2,19 @@ package com.ifood.challenge.movies.core.designsystem.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
 import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
@@ -72,12 +71,13 @@ object FilterChipRowTestTags {
 private fun FilterChipRowPreview() {
     IfoodMoviesTheme {
         FilterChipRow(
-            chips = listOf(
-                MovieFilterChip(key = "popular", label = "Popular"),
-                MovieFilterChip(key = "favorites", label = "Favoritos · 3"),
-                MovieFilterChip(key = "now", label = "Mais Recentes"),
-                MovieFilterChip(key = "action", label = "Ação"),
-            ),
+            chips =
+                listOf(
+                    MovieFilterChip(key = "popular", label = "Popular"),
+                    MovieFilterChip(key = "favorites", label = "Favoritos · 3"),
+                    MovieFilterChip(key = "now", label = "Mais Recentes"),
+                    MovieFilterChip(key = "action", label = "Ação"),
+                ),
             selected = "popular",
             onSelect = {},
         )

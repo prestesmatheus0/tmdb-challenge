@@ -1,7 +1,7 @@
 package com.ifood.challenge.movies.domain.movies
 
-import app.cash.turbine.test
 import androidx.paging.PagingData
+import app.cash.turbine.test
 import com.ifood.challenge.movies.domain.movies.internal.FetchMovieDetailUseCaseImpl
 import com.ifood.challenge.movies.domain.movies.internal.GetFavoriteIdsUseCaseImpl
 import com.ifood.challenge.movies.domain.movies.internal.GetFavoriteMoviesUseCaseImpl
@@ -32,8 +32,14 @@ class UseCasesTest {
     private val repository = mockk<MoviesRepository>()
 
     private val movie = Movie(
-        id = 1, title = "Inception", posterPath = null, backdropPath = null,
-        overview = "", voteAverage = 8.8, releaseDate = null, popularity = 100.0,
+        id = 1,
+        title = "Inception",
+        posterPath = null,
+        backdropPath = null,
+        overview = "",
+        voteAverage = 8.8,
+        releaseDate = null,
+        popularity = 100.0,
     )
 
     // GetGenresUseCase

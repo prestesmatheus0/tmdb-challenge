@@ -1,8 +1,15 @@
 package com.ifood.challenge.movies.core.network
 
 interface ImageUrlBuilder {
-    fun poster(path: String?, size: PosterSize = PosterSize.W500): String?
-    fun backdrop(path: String?, size: BackdropSize = BackdropSize.W1280): String?
+    fun poster(
+        path: String?,
+        size: PosterSize = PosterSize.W500,
+    ): String?
+
+    fun backdrop(
+        path: String?,
+        size: BackdropSize = BackdropSize.W1280,
+    ): String?
 }
 
 enum class PosterSize(val segment: String) {

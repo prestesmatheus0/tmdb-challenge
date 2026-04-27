@@ -34,6 +34,7 @@ class HomeScreenTest {
     private val pagingFlow = MutableStateFlow(PagingData.empty<Movie>())
     private val fakeImageUrlBuilder = object : ImageUrlBuilder {
         override fun poster(path: String?, size: PosterSize) = ""
+
         override fun backdrop(path: String?, size: BackdropSize) = ""
     }
 

@@ -1,19 +1,18 @@
 package com.ifood.challenge.movies.feature.home
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.paging.PagingData
 import com.ifood.challenge.movies.core.common.network.ConnectivityObserver
 import com.ifood.challenge.movies.core.common.network.NetworkStatus
 import com.ifood.challenge.movies.core.testing.MainDispatcherRule
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
+import com.ifood.challenge.movies.domain.movies.usecase.GetFavoriteIdsUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetFavoriteMoviesUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetGenresUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByGenreUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByQueryUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetNowPlayingMoviesUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetPopularMoviesUseCase
-import com.ifood.challenge.movies.domain.movies.usecase.GetFavoriteIdsUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
 import com.ifood.challenge.movies.feature.home.internal.HomeFilter
 import com.ifood.challenge.movies.feature.home.internal.HomeViewModel

@@ -10,7 +10,10 @@ import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 
-internal fun MovieDto.toEntity(page: Int, fetchedAt: Long = System.currentTimeMillis()): MovieEntity =
+internal fun MovieDto.toEntity(
+    page: Int,
+    fetchedAt: Long = System.currentTimeMillis(),
+): MovieEntity =
     MovieEntity(
         id = id,
         title = title,

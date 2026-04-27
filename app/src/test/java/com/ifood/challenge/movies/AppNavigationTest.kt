@@ -3,9 +3,9 @@ package com.ifood.challenge.movies
 import com.ifood.challenge.movies.feature.detail.DetailRoute
 import com.ifood.challenge.movies.feature.home.HomeRoute
 import kotlinx.serialization.json.Json
-import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Test
 
 /**
  * Type-safe Navigation 3 routes: data class + @Serializable.
@@ -13,7 +13,6 @@ import org.junit.Assert.assertNotNull
  * and that arguments are preserved.
  */
 class AppNavigationTest {
-
     @Test
     fun homeRoute_isSingletonObject() {
         // HomeRoute has no args, must remain stable across navigation

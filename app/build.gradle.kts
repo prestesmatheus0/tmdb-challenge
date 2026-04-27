@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-val tmdbApiKey: String = run {
+fun loadTmdbApiKey(): String {
     val props = Properties()
     val localProps = rootProject.file("local.properties")
     if (localProps.exists()) {
@@ -23,8 +23,10 @@ val tmdbApiKey: String = run {
                 "variable before running the app. See README.",
         )
     }
-    key
+    return key
 }
+
+val tmdbApiKey: String = loadTmdbApiKey()
 
 android {
     namespace = "com.ifood.challenge.movies"
@@ -67,7 +69,7 @@ android {
     }
 
     packaging {
-        resources.excludes += setOf(
+        resources.excludes += listOf(
             "/META-INF/{AL2.0,LGPL2.1}",
             "META-INF/LICENSE.md",
             "META-INF/LICENSE-notice.md",

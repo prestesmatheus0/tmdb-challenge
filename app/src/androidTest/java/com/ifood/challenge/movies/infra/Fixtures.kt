@@ -2,8 +2,11 @@ package com.ifood.challenge.movies.infra
 
 /** Canned TMDB-shaped JSON responses for instrumentation tests. */
 object Fixtures {
-
-    fun popularPage(page: Int = 1, totalPages: Int = 1): String = """
+    fun popularPage(
+        page: Int = 1,
+        totalPages: Int = 1,
+    ): String =
+        """
         {
           "page": $page,
           "total_pages": $totalPages,
@@ -30,13 +33,15 @@ object Fixtures {
             }
           ]
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    fun emptyPage(): String = """
+    fun emptyPage(): String =
+        """
         {"page": 1, "total_pages": 1, "results": []}
-    """.trimIndent()
+        """.trimIndent()
 
-    fun searchResults(query: String): String = """
+    fun searchResults(query: String): String =
+        """
         {
           "page": 1,
           "total_pages": 1,
@@ -53,9 +58,10 @@ object Fixtures {
             }
           ]
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    fun movieDetail(movieId: Int = 27205): String = """
+    fun movieDetail(movieId: Int = 27205): String =
+        """
         {
           "id": $movieId,
           "title": "Inception",
@@ -71,9 +77,10 @@ object Fixtures {
             {"id": 878, "name": "Ficção Científica"}
           ]
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    fun genres(): String = """
+    fun genres(): String =
+        """
         {
           "genres": [
             {"id": 28, "name": "Ação"},
@@ -81,5 +88,5 @@ object Fixtures {
             {"id": 16, "name": "Animação"}
           ]
         }
-    """.trimIndent()
+        """.trimIndent()
 }

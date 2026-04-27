@@ -8,14 +8,24 @@ import kotlinx.coroutines.flow.Flow
 
 interface MoviesRepository {
     fun popularPagingFlow(): Flow<PagingData<Movie>>
+
     fun nowPlayingPagingFlow(): Flow<PagingData<Movie>>
+
     fun discoverByGenrePagingFlow(genreId: Int): Flow<PagingData<Movie>>
+
     fun searchPagingFlow(query: String): Flow<PagingData<Movie>>
+
     fun observeDetail(movieId: Int): Flow<MovieDetail?>
+
     fun observeIsFavorite(movieId: Int): Flow<Boolean>
+
     fun observeAllFavoriteIds(): Flow<Set<Int>>
+
     fun observeFavoriteMovies(): Flow<List<Movie>>
+
     suspend fun fetchGenres(): List<Genre>
+
     suspend fun fetchAndCacheDetail(movieId: Int)
+
     suspend fun setFavorite(movie: Movie, isFavorite: Boolean)
 }

@@ -33,9 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.ifood.challenge.movies.core.designsystem.component.EmptyState
 import com.ifood.challenge.movies.core.designsystem.component.ErrorState
@@ -49,14 +50,12 @@ import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
 import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
 import com.ifood.challenge.movies.core.network.BackdropSize
+import com.ifood.challenge.movies.core.network.ImageUrlBuilder
 import com.ifood.challenge.movies.core.network.PosterSize
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
-import androidx.paging.PagingData
-import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.flowOf
 import org.koin.compose.koinInject
-import com.ifood.challenge.movies.core.network.ImageUrlBuilder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -329,6 +328,7 @@ private val PREVIEW_MOVIE = Movie(
 
 private val PREVIEW_IMAGE_BUILDER = object : ImageUrlBuilder {
     override fun poster(path: String?, size: PosterSize) = ""
+
     override fun backdrop(path: String?, size: BackdropSize) = ""
 }
 

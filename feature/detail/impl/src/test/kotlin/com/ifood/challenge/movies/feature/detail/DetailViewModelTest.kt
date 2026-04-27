@@ -1,5 +1,6 @@
 package com.ifood.challenge.movies.feature.detail
 
+import androidx.lifecycle.SavedStateHandle
 import com.ifood.challenge.movies.core.testing.MainDispatcherRule
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
@@ -7,7 +8,6 @@ import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 import com.ifood.challenge.movies.domain.movies.usecase.FetchMovieDetailUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetIsFavoriteUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMovieDetailUseCase
-import androidx.lifecycle.SavedStateHandle
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
 import com.ifood.challenge.movies.feature.detail.internal.DetailUiState
 import com.ifood.challenge.movies.feature.detail.internal.DetailViewModel

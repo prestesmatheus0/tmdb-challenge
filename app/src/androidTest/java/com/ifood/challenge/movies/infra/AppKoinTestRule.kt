@@ -25,7 +25,6 @@ import org.koin.core.context.stopKoin
 class AppKoinTestRule(
     private val mockWebServer: MockWebServerRule,
 ) : ExternalResource() {
-
     override fun before() {
         // tear down whatever Application started
         if (GlobalContext.getOrNull() != null) stopKoin()

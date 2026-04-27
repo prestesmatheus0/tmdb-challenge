@@ -12,7 +12,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class EmptyStateTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 

@@ -28,16 +28,16 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class ConfigChangeTest {
-
     private val mockWebServer = MockWebServerRule()
     private val koin = AppKoinTestRule(mockWebServer)
     private val compose = createAndroidComposeRule<MainActivity>()
 
     @get:Rule
-    val chain: RuleChain = RuleChain
-        .outerRule(mockWebServer)
-        .around(koin)
-        .around(compose)
+    val chain: RuleChain =
+        RuleChain
+            .outerRule(mockWebServer)
+            .around(koin)
+            .around(compose)
 
     @Test
     fun rotation_preservesSelectedFilter() {

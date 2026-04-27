@@ -33,9 +33,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -50,16 +50,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.ifood.challenge.movies.core.designsystem.component.ErrorState
+import com.ifood.challenge.movies.core.designsystem.component.ErrorVariant
+import com.ifood.challenge.movies.core.designsystem.component.ShimmerBox
 import com.ifood.challenge.movies.core.designsystem.preview.PreviewThemes
 import com.ifood.challenge.movies.core.designsystem.theme.Dimens
 import com.ifood.challenge.movies.core.designsystem.theme.IfoodMoviesTheme
 import com.ifood.challenge.movies.core.designsystem.theme.spacing
 import com.ifood.challenge.movies.core.network.BackdropSize
+import com.ifood.challenge.movies.core.network.ImageUrlBuilder
 import com.ifood.challenge.movies.core.network.PosterSize
 import com.ifood.challenge.movies.domain.movies.model.Genre
-import com.ifood.challenge.movies.core.designsystem.component.ErrorVariant
-import com.ifood.challenge.movies.core.designsystem.component.ShimmerBox
-import com.ifood.challenge.movies.core.network.ImageUrlBuilder
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
 import org.koin.compose.koinInject
 
@@ -369,6 +369,7 @@ private val PREVIEW_DETAIL = MovieDetail(
 
 private val PREVIEW_IMAGE_BUILDER = object : ImageUrlBuilder {
     override fun poster(path: String?, size: PosterSize) = ""
+
     override fun backdrop(path: String?, size: BackdropSize) = ""
 }
 

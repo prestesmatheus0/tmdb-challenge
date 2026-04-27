@@ -13,7 +13,6 @@ import org.junit.rules.ExternalResource
  * for one-off responses; the dispatcher fallback returns 404 for unmatched paths.
  */
 class MockWebServerRule : ExternalResource() {
-
     val server: MockWebServer = MockWebServer()
     val baseUrl: String get() = server.url("/").toString()
 
@@ -26,14 +25,15 @@ class MockWebServerRule : ExternalResource() {
     override fun before() {
         routes.clear()
         recordedPaths.clear()
-        server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest): MockResponse {
-                val path = request.path.orEmpty()
-                synchronized(recordedPaths) { recordedPaths.add(path) }
-                val handler = routes.entries.firstOrNull { (prefix, _) -> path.startsWith(prefix) }
-                return handler?.value?.invoke() ?: MockResponse().setResponseCode(404)
+        server.dispatcher =
+            object : Dispatcher() {
+                override fun dispatch(request: RecordedRequest): MockResponse {
+                    val path = request.path.orEmpty()
+                    synchronized(recordedPaths) { recordedPaths.add(path) }
+                    val handler = routes.entries.firstOrNull { (prefix, _) -> path.startsWith(prefix) }
+                    return handler?.value?.invoke() ?: MockResponse().setResponseCode(404)
+                }
             }
-        }
         server.start()
     }
 
@@ -42,7 +42,11 @@ class MockWebServerRule : ExternalResource() {
     }
 
     /** Register a JSON response for any path matching [pathPrefix]. */
-    fun route(pathPrefix: String, body: String, code: Int = 200) {
+    fun route(
+        pathPrefix: String,
+        body: String,
+        code: Int = 200,
+    ) {
         routes[pathPrefix] = {
             MockResponse()
                 .setResponseCode(code)
@@ -52,7 +56,10 @@ class MockWebServerRule : ExternalResource() {
     }
 
     /** Replace any handler for [pathPrefix] with an error response. */
-    fun routeError(pathPrefix: String, code: Int = 500) {
+    fun routeError(
+        pathPrefix: String,
+        code: Int = 500,
+    ) {
         routes[pathPrefix] = { MockResponse().setResponseCode(code) }
     }
 

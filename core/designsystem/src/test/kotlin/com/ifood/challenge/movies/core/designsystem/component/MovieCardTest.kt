@@ -6,15 +6,14 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.junit.Assert.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class MovieCardTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 

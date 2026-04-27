@@ -5,7 +5,6 @@ import org.junit.Assert.assertSame
 import org.junit.Test
 
 class DispatcherProviderTest {
-
     @Test
     fun defaultProvider_exposesStandardDispatchers() {
         val provider = DefaultDispatcherProvider()
