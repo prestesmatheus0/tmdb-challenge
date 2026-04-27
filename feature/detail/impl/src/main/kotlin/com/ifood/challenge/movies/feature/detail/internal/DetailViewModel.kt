@@ -52,7 +52,7 @@ internal class DetailViewModel(
         initialValue = DetailUiState.Loading,
     )
 
-    init {
+    fun onViewCreated() {
         loadDetail()
     }
 

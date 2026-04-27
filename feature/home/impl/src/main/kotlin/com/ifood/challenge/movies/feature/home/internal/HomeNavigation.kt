@@ -15,6 +15,10 @@ fun NavGraphBuilder.homeScreen(onMovieClick: (movieId: Int) -> Unit) {
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         val movies = viewModel.moviesPagingFlow.collectAsLazyPagingItems()
 
+        LaunchedEffect(viewModel) {
+            viewModel.onViewCreated()
+        }
+
         LaunchedEffect(viewModel.shuffleEvent) {
             viewModel.shuffleEvent.collect { movieId -> onMovieClick(movieId) }
         }

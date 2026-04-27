@@ -43,8 +43,8 @@ internal class HomeViewModel(
     private val getGenres: GetGenresUseCase,
     private val setFavorite: SetFavoriteUseCase,
     private val getFavoriteMovies: GetFavoriteMoviesUseCase,
-    observeFavoriteIds: GetFavoriteIdsUseCase,
-    connectivityObserver: ConnectivityObserver,
+    private val observeFavoriteIds: GetFavoriteIdsUseCase,
+    private val connectivityObserver: ConnectivityObserver,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -81,7 +81,7 @@ internal class HomeViewModel(
             }
             .cachedIn(viewModelScope)
 
-    init {
+    fun onViewCreated() {
         viewModelScope.launch {
             observeFavoriteIds().collect { ids ->
                 _uiState.update { it.copy(favoriteIds = ids) }
