@@ -1,4 +1,4 @@
-# iFood Android Challenge — Movies App
+# TMDB Movies Challenge
 
 App Android nativo de listagem de filmes usando a API do TMDB.
 
@@ -57,10 +57,24 @@ GitHub Actions em `.github/workflows/ci.yml`. Roda em cada PR + push para `main`
 1. ktlint
 2. detekt
 3. testes unitários (release variant)
-4. assemble APK (com `secrets.TMDB_API_KEY`)
-5. upload de relatórios (test + detekt) como artifacts
+4. assemble APK release (assinado se secrets configurados)
+5. upload APK como artifact (`app-release`, 7 dias)
+6. upload de relatórios (test + detekt) como artifacts
 
 Cache do Gradle compartilhado entre runs. PR não escreve no cache (read-only).
+
+### Signing
+
+O APK é assinado automaticamente se os seguintes secrets estiverem configurados no repositório:
+
+| Secret | Descrição |
+|--------|-----------|
+| `KEYSTORE_BASE64` | Keystore codificado em base64 (`base64 -i release.jks`) |
+| `KEYSTORE_PASSWORD` | Senha do keystore |
+| `KEY_ALIAS` | Alias da chave |
+| `KEY_PASSWORD` | Senha da chave |
+
+Sem os secrets, o CI gera um APK não-assinado normalmente.
 
 ## Telas
 
@@ -104,6 +118,8 @@ app/
 
 **Padrão public/impl:** cada módulo expõe apenas interfaces e modelos via `:public`; a implementação fica em `:impl` e não vaza dependências de framework.
 
+**Inicialização de ViewModel:** lógica de inicialização (coleta de flows, carregamento inicial) fica em `onViewCreated()`, chamado via `LaunchedEffect(viewModel)` no arquivo de Navigation — não em `init`. Isso mantém o ViewModel testável sem efeitos colaterais na construção.
+
 ## Stack
 
 | Camada | Tecnologia |
@@ -145,9 +161,9 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 | Compose UI (JVM) | `HomeScreenTest`, `DetailScreenTest` (Robolectric + `createComposeRule`) |
 | Designsystem | `MovieCard`, `FilterChipRow`, `EmptyState`, `ErrorState`, `OfflineBanner` |
 | Navigation | rotas type-safe, round-trip serializável |
-| **E2E instrumentado** | `UserJourneyTest` (6 flows) + `ConfigChangeTest` (4 cenários de rotation/process death) — `app/src/androidTest/`, MockWebServer + Koin override + Room in-memory |
+| **E2E instrumentado** | `UserJourneyTest` (11 flows) + `ConfigChangeTest` (4 cenários de rotation/process death) — `app/src/androidTest/`, MockWebServer + Koin override + Room in-memory |
 
-**Rodar instrumentados** (precisa emulador conectado):
+**Rodar instrumentados** (precisa emulador conectado — não rodam no CI):
 ```bash
 ./gradlew :app:connectedDebugAndroidTest
 ```
@@ -164,4 +180,4 @@ Os testes E2E seguem o [guia oficial Compose Testing](https://developer.android.
 val getPopular = GetPopularMoviesUseCase { emptyFlow() }
 ```
 
-ViewModels usam `MainDispatcherRule` (`UnconfinedTestDispatcher`) para controle de coroutines em testes.
+ViewModels usam `MainDispatcherRule` (`UnconfinedTestDispatcher`) para controle de coroutines em testes. Testes que dependem de inicialização chamam `viewModel.onViewCreated()` explicitamente após criar a instância.
