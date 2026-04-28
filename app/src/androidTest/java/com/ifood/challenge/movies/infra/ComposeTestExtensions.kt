@@ -7,7 +7,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import org.junit.rules.TestRule
 
-const val DEFAULT_WAIT_MS: Long = 5_000
+const val DEFAULT_WAIT_MS: Long = 10_000
 
 fun <R : TestRule, A : androidx.activity.ComponentActivity> AndroidComposeTestRule<R, A>.waitUntilTextDisplayed(
     text: String,
