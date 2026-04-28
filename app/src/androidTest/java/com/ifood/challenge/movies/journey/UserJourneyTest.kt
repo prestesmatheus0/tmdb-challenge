@@ -9,9 +9,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ifood.challenge.movies.MainActivity
 import com.ifood.challenge.movies.infra.AppKoinTestRule
+import com.ifood.challenge.movies.infra.DEFAULT_WAIT_MS
 import com.ifood.challenge.movies.infra.Fixtures
 import com.ifood.challenge.movies.infra.MockWebServerRule
-import com.ifood.challenge.movies.infra.DEFAULT_WAIT_MS
 import com.ifood.challenge.movies.infra.createLazyAndroidComposeRule
 import com.ifood.challenge.movies.infra.waitUntilTextDisplayed
 import org.junit.Rule
