@@ -8,6 +8,14 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+fun loadSigningProperty(key: String): String =
+    System.getenv(key) ?: run {
+        val props = Properties()
+        val localProps = rootProject.file("local.properties")
+        if (localProps.exists()) localProps.inputStream().use { props.load(it) }
+        props.getProperty(key) ?: ""
+    }
+
 fun loadTmdbApiKey(): String {
     val props = Properties()
     val localProps = rootProject.file("local.properties")
@@ -50,6 +58,22 @@ android {
         )
     }
 
+    val keystorePassword = loadSigningProperty("KEYSTORE_PASSWORD")
+    val keyAlias = loadSigningProperty("KEY_ALIAS")
+    val keyPassword = loadSigningProperty("KEY_PASSWORD")
+    val keystoreFile = rootProject.file("release.jks")
+
+    if (keystoreFile.exists() && keystorePassword.isNotBlank()) {
+        signingConfigs {
+            create("release") {
+                storeFile = keystoreFile
+                storePassword = keystorePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
@@ -61,6 +85,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            val releaseSigningConfig = signingConfigs.findByName("release")
+            if (releaseSigningConfig != null) {
+                signingConfig = releaseSigningConfig
+            }
         }
     }
 
