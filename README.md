@@ -118,6 +118,8 @@ app/
 
 **MVVM + Clean Architecture:** UI → ViewModel → UseCase → Repository → DataSource. Cada camada depende apenas da abstração da camada abaixo via `:public`. ViewModel expõe `StateFlow<UiState>` e a Screen é stateless — recebe dados e callbacks como parâmetros.
 
+**Padrão MVI (onAction):** cada feature define uma `sealed interface XxxAction` com todas as intenções do usuário. A Screen recebe um único `onAction: (XxxAction) -> Unit`; o ViewModel expõe um único `fun onAction(action: XxxAction)` com `when` exaustivo que despacha para métodos privados. Callbacks de navegação (`onMovieClick`, `onBack`) permanecem separados pois são responsabilidade da camada de Navigation, não do ViewModel.
+
 **Padrão public/impl:** cada módulo expõe apenas interfaces e modelos via `:public`; a implementação fica em `:impl` e não vaza dependências de framework.
 
 **Inicialização de ViewModel:** lógica de inicialização (coleta de flows, carregamento inicial) fica em `onViewCreated()`, chamado via `LaunchedEffect(viewModel)` no arquivo de Navigation — não em `init`. Isso mantém o ViewModel testável sem efeitos colaterais na construção.
