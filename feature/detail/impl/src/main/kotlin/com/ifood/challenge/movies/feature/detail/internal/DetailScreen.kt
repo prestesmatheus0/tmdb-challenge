@@ -68,8 +68,7 @@ import org.koin.compose.koinInject
 internal fun DetailScreen(
     uiState: DetailUiState,
     onBack: () -> Unit,
-    onFavoriteToggle: () -> Unit,
-    onRetry: () -> Unit,
+    onAction: (DetailAction) -> Unit,
     modifier: Modifier = Modifier,
     imageUrlBuilder: ImageUrlBuilder = koinInject(),
 ) {
@@ -85,13 +84,13 @@ internal fun DetailScreen(
             DetailUiState.Loading -> DetailSkeleton()
             DetailUiState.Error -> ErrorState(
                 variant = ErrorVariant.Generic,
-                onRetry = onRetry,
+                onRetry = { onAction(DetailAction.Retry) },
                 modifier = Modifier.fillMaxSize(),
             )
             is DetailUiState.Success -> DetailContent(
                 detail = uiState.detail,
                 isFavorite = uiState.isFavorite,
-                onFavoriteToggle = onFavoriteToggle,
+                onFavoriteToggle = { onAction(DetailAction.FavoriteToggle) },
                 imageUrlBuilder = imageUrlBuilder,
                 scrollState = scrollState,
             )
@@ -103,7 +102,7 @@ internal fun DetailScreen(
             showFavorite = uiState is DetailUiState.Success,
             collapseAlpha = collapseAlpha,
             onBack = onBack,
-            onFavoriteToggle = onFavoriteToggle,
+            onFavoriteToggle = { onAction(DetailAction.FavoriteToggle) },
         )
     }
 }
@@ -381,8 +380,7 @@ private fun DetailScreenLoadingPreview() {
         DetailScreen(
             uiState = DetailUiState.Loading,
             onBack = {},
-            onFavoriteToggle = {},
-            onRetry = {},
+            onAction = {},
             imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
         )
     }
@@ -395,8 +393,7 @@ private fun DetailScreenErrorPreview() {
         DetailScreen(
             uiState = DetailUiState.Error,
             onBack = {},
-            onFavoriteToggle = {},
-            onRetry = {},
+            onAction = {},
             imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
         )
     }
@@ -409,8 +406,7 @@ private fun DetailScreenSuccessPreview() {
         DetailScreen(
             uiState = DetailUiState.Success(PREVIEW_DETAIL, isFavorite = false),
             onBack = {},
-            onFavoriteToggle = {},
-            onRetry = {},
+            onAction = {},
             imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
         )
     }

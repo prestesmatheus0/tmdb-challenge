@@ -14,6 +14,7 @@ import com.ifood.challenge.movies.core.network.ImageUrlBuilder
 import com.ifood.challenge.movies.core.network.PosterSize
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.Movie
+import com.ifood.challenge.movies.feature.home.internal.HomeAction
 import com.ifood.challenge.movies.feature.home.internal.HomeFilter
 import com.ifood.challenge.movies.feature.home.internal.HomeScreen
 import com.ifood.challenge.movies.feature.home.internal.HomeUiState
@@ -41,11 +42,7 @@ class HomeScreenTest {
     private fun setContent(
         uiState: HomeUiState = HomeUiState(),
         onMovieClick: (Int) -> Unit = {},
-        onFilterSelect: (HomeFilter) -> Unit = {},
-        onSearchQueryChange: (String) -> Unit = {},
-        onSearchToggle: () -> Unit = {},
-        onFavoriteToggle: (Movie) -> Unit = {},
-        onShuffle: () -> Unit = {},
+        onAction: (HomeAction) -> Unit = {},
     ) {
         composeTestRule.setContent {
             val movies = pagingFlow.collectAsLazyPagingItems()
@@ -53,11 +50,7 @@ class HomeScreenTest {
                 uiState = uiState,
                 movies = movies,
                 onMovieClick = onMovieClick,
-                onFilterSelect = onFilterSelect,
-                onSearchQueryChange = onSearchQueryChange,
-                onSearchToggle = onSearchToggle,
-                onFavoriteToggle = onFavoriteToggle,
-                onShuffle = onShuffle,
+                onAction = onAction,
                 imageUrlBuilder = fakeImageUrlBuilder,
             )
         }
@@ -118,7 +111,7 @@ class HomeScreenTest {
     @Test
     fun searchToggle_callsCallback() {
         var toggled = false
-        setContent(onSearchToggle = { toggled = true })
+        setContent(onAction = { if (it is HomeAction.SearchToggle) toggled = true })
         composeTestRule.onNodeWithContentDescription("Buscar").performClick()
         assertTrue(toggled)
     }
@@ -163,7 +156,7 @@ class HomeScreenTest {
         var shuffled = false
         setContent(
             uiState = HomeUiState(favoriteIds = setOf(1)),
-            onShuffle = { shuffled = true },
+            onAction = { if (it is HomeAction.Shuffle) shuffled = true },
         )
         composeTestRule.onNodeWithContentDescription("Filme aleatório dos favoritos").performClick()
         assertTrue(shuffled)
@@ -174,7 +167,7 @@ class HomeScreenTest {
         var selectedFilter: HomeFilter? = null
         setContent(
             uiState = HomeUiState(genres = TEST_GENRES),
-            onFilterSelect = { selectedFilter = it },
+            onAction = { if (it is HomeAction.FilterSelect) selectedFilter = it.filter },
         )
         composeTestRule.onNodeWithText("Favoritos").performClick()
         assertEquals(HomeFilter.Favorites, selectedFilter)

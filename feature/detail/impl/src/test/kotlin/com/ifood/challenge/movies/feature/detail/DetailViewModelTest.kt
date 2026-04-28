@@ -9,6 +9,7 @@ import com.ifood.challenge.movies.domain.movies.usecase.FetchMovieDetailUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetIsFavoriteUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetMovieDetailUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
+import com.ifood.challenge.movies.feature.detail.internal.DetailAction
 import com.ifood.challenge.movies.feature.detail.internal.DetailUiState
 import com.ifood.challenge.movies.feature.detail.internal.DetailViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -122,7 +123,7 @@ class DetailViewModelTest {
 
         fetchResult = Result.success(Unit)
         detailFlow.value = TEST_DETAIL
-        viewModel.onRetry()
+        viewModel.onAction(DetailAction.Retry)
 
         assertIs<DetailUiState.Success>(viewModel.uiState.value)
     }
@@ -136,7 +137,7 @@ class DetailViewModelTest {
             viewModel.uiState.collect()
         }
 
-        viewModel.onFavoriteToggle()
+        viewModel.onAction(DetailAction.FavoriteToggle)
 
         assertEquals(1, setFavoriteCalls.size)
         assertEquals(MOVIE_ID, setFavoriteCalls[0].first.id)
@@ -152,7 +153,7 @@ class DetailViewModelTest {
             viewModel.uiState.collect()
         }
 
-        viewModel.onFavoriteToggle()
+        viewModel.onAction(DetailAction.FavoriteToggle)
 
         assertEquals(1, setFavoriteCalls.size)
         assertEquals(false, setFavoriteCalls[0].second)
@@ -165,7 +166,7 @@ class DetailViewModelTest {
             viewModel.uiState.collect()
         }
 
-        viewModel.onFavoriteToggle()
+        viewModel.onAction(DetailAction.FavoriteToggle)
 
         assertEquals(0, setFavoriteCalls.size)
     }

@@ -20,8 +20,7 @@ fun NavGraphBuilder.detailScreen(onBack: () -> Unit) {
         DetailScreen(
             uiState = uiState,
             onBack = onBack,
-            onFavoriteToggle = viewModel::onFavoriteToggle,
-            onRetry = viewModel::onRetry,
+            onAction = viewModel::onAction,
         )
     }
 }

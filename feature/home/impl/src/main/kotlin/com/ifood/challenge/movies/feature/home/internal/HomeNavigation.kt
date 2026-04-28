@@ -27,11 +27,7 @@ fun NavGraphBuilder.homeScreen(onMovieClick: (movieId: Int) -> Unit) {
             uiState = uiState,
             movies = movies,
             onMovieClick = onMovieClick,
-            onFilterSelect = viewModel::onFilterSelect,
-            onSearchQueryChange = viewModel::onSearchQueryChange,
-            onSearchToggle = viewModel::onSearchToggle,
-            onFavoriteToggle = viewModel::onFavoriteToggle,
-            onShuffle = viewModel::onShuffle,
+            onAction = viewModel::onAction,
         )
     }
 }

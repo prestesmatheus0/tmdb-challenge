@@ -14,6 +14,7 @@ import com.ifood.challenge.movies.domain.movies.usecase.GetMoviesByQueryUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetNowPlayingMoviesUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.GetPopularMoviesUseCase
 import com.ifood.challenge.movies.domain.movies.usecase.SetFavoriteUseCase
+import com.ifood.challenge.movies.feature.home.internal.HomeAction
 import com.ifood.challenge.movies.feature.home.internal.HomeFilter
 import com.ifood.challenge.movies.feature.home.internal.HomeViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -145,13 +146,13 @@ class HomeViewModelTest {
             viewModel.uiState.collect()
         }
 
-        viewModel.onFilterSelect(HomeFilter.Favorites)
+        viewModel.onAction(HomeAction.FilterSelect(HomeFilter.Favorites))
         assertIs<HomeFilter.Favorites>(viewModel.uiState.value.filter)
 
-        viewModel.onFilterSelect(HomeFilter.NowPlaying)
+        viewModel.onAction(HomeAction.FilterSelect(HomeFilter.NowPlaying))
         assertIs<HomeFilter.NowPlaying>(viewModel.uiState.value.filter)
 
-        viewModel.onFilterSelect(HomeFilter.Genre(28))
+        viewModel.onAction(HomeAction.FilterSelect(HomeFilter.Genre(28)))
         val genre = viewModel.uiState.value.filter
         assertIs<HomeFilter.Genre>(genre)
         assertEquals(28, genre.genreId)
@@ -164,11 +165,11 @@ class HomeViewModelTest {
             viewModel.uiState.collect()
         }
 
-        viewModel.onSearchToggle()
-        viewModel.onSearchQueryChange("test")
+        viewModel.onAction(HomeAction.SearchToggle)
+        viewModel.onAction(HomeAction.SearchQueryChange("test"))
         assertTrue(viewModel.uiState.value.isSearchActive)
 
-        viewModel.onFilterSelect(HomeFilter.Favorites)
+        viewModel.onAction(HomeAction.FilterSelect(HomeFilter.Favorites))
         assertEquals("", viewModel.uiState.value.searchQuery)
         assertFalse(viewModel.uiState.value.isSearchActive)
     }
@@ -180,10 +181,10 @@ class HomeViewModelTest {
             viewModel.uiState.collect()
         }
 
-        viewModel.onSearchToggle()
+        viewModel.onAction(HomeAction.SearchToggle)
         assertTrue(viewModel.uiState.value.isSearchActive)
 
-        viewModel.onSearchToggle()
+        viewModel.onAction(HomeAction.SearchToggle)
         assertFalse(viewModel.uiState.value.isSearchActive)
         assertEquals("", viewModel.uiState.value.searchQuery)
     }
@@ -195,8 +196,8 @@ class HomeViewModelTest {
             viewModel.uiState.collect()
         }
 
-        viewModel.onFilterSelect(HomeFilter.Favorites)
-        viewModel.onSearchToggle()
+        viewModel.onAction(HomeAction.FilterSelect(HomeFilter.Favorites))
+        viewModel.onAction(HomeAction.SearchToggle)
 
         assertIs<HomeFilter.Popular>(viewModel.uiState.value.filter)
         assertTrue(viewModel.uiState.value.isSearchActive)
@@ -209,7 +210,7 @@ class HomeViewModelTest {
             viewModel.uiState.collect()
         }
 
-        viewModel.onSearchQueryChange("inception")
+        viewModel.onAction(HomeAction.SearchQueryChange("inception"))
         assertEquals("inception", viewModel.uiState.value.searchQuery)
     }
 
@@ -220,8 +221,8 @@ class HomeViewModelTest {
             viewModel.uiState.collect()
         }
 
-        viewModel.onFilterSelect(HomeFilter.Favorites)
-        viewModel.onSearchQueryChange("test")
+        viewModel.onAction(HomeAction.FilterSelect(HomeFilter.Favorites))
+        viewModel.onAction(HomeAction.SearchQueryChange("test"))
 
         assertIs<HomeFilter.Popular>(viewModel.uiState.value.filter)
     }
@@ -234,7 +235,7 @@ class HomeViewModelTest {
         }
 
         favoriteIdsFlow.value = emptySet()
-        viewModel.onFavoriteToggle(TEST_MOVIE)
+        viewModel.onAction(HomeAction.FavoriteToggle(TEST_MOVIE))
 
         assertEquals(1, setFavoriteCalls.size)
         assertEquals(true, setFavoriteCalls[0].second)
@@ -249,7 +250,7 @@ class HomeViewModelTest {
         viewModel.onViewCreated()
 
         favoriteIdsFlow.value = setOf(TEST_MOVIE.id)
-        viewModel.onFavoriteToggle(TEST_MOVIE)
+        viewModel.onAction(HomeAction.FavoriteToggle(TEST_MOVIE))
 
         assertEquals(1, setFavoriteCalls.size)
         assertEquals(false, setFavoriteCalls[0].second)
@@ -271,7 +272,7 @@ class HomeViewModelTest {
             viewModel.shuffleEvent.collect { emittedId = it }
         }
 
-        viewModel.onShuffle()
+        viewModel.onAction(HomeAction.Shuffle)
 
         assertTrue(emittedId == TEST_MOVIE.id || emittedId == movie2.id)
     }
@@ -288,7 +289,7 @@ class HomeViewModelTest {
             viewModel.shuffleEvent.collect { emittedId = it }
         }
 
-        viewModel.onShuffle()
+        viewModel.onAction(HomeAction.Shuffle)
 
         assertEquals(null, emittedId)
     }
@@ -300,9 +301,9 @@ class HomeViewModelTest {
             viewModel.uiState.collect()
         }
 
-        viewModel.onFilterSelect(HomeFilter.Genre(28))
-        viewModel.onSearchToggle()
-        viewModel.onSearchQueryChange("inception")
+        viewModel.onAction(HomeAction.FilterSelect(HomeFilter.Genre(28)))
+        viewModel.onAction(HomeAction.SearchToggle)
+        viewModel.onAction(HomeAction.SearchQueryChange("inception"))
 
         val handle = SavedStateHandle().apply {
             this["home_search_query"] = "inception"

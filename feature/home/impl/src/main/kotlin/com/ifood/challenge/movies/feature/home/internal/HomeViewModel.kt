@@ -100,7 +100,15 @@ internal class HomeViewModel(
         loadGenres()
     }
 
-    fun onSearchQueryChange(query: String) {
+    fun onAction(action: HomeAction) = when (action) {
+        is HomeAction.FilterSelect -> onFilterSelect(action.filter)
+        is HomeAction.SearchQueryChange -> onSearchQueryChange(action.query)
+        HomeAction.SearchToggle -> onSearchToggle()
+        is HomeAction.FavoriteToggle -> onFavoriteToggle(action.movie)
+        HomeAction.Shuffle -> onShuffle()
+    }
+
+    private fun onSearchQueryChange(query: String) {
         _uiState.update {
             it.copy(
                 searchQuery = query,
@@ -113,7 +121,7 @@ internal class HomeViewModel(
         }
     }
 
-    fun onSearchToggle() {
+    private fun onSearchToggle() {
         _uiState.update { state ->
             if (state.isSearchActive) {
                 state.copy(isSearchActive = false, searchQuery = "")
@@ -129,7 +137,7 @@ internal class HomeViewModel(
         persistFilter(_uiState.value.filter)
     }
 
-    fun onFilterSelect(filter: HomeFilter) {
+    private fun onFilterSelect(filter: HomeFilter) {
         _uiState.update {
             it.copy(filter = filter, searchQuery = "", isSearchActive = false)
         }
@@ -138,14 +146,14 @@ internal class HomeViewModel(
         savedStateHandle[KEY_SEARCH_ACTIVE] = false
     }
 
-    fun onFavoriteToggle(movie: Movie) {
+    private fun onFavoriteToggle(movie: Movie) {
         val isCurrentlyFavorite = movie.id in _uiState.value.favoriteIds
         viewModelScope.launch {
             setFavorite(movie, isFavorite = !isCurrentlyFavorite)
         }
     }
 
-    fun onShuffle() {
+    private fun onShuffle() {
         val favorites = _uiState.value.favoriteMovies
         if (favorites.isNotEmpty()) {
             _shuffleEvent.tryEmit(favorites.random().id)

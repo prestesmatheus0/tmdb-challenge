@@ -56,7 +56,12 @@ internal class DetailViewModel(
         loadDetail()
     }
 
-    fun onRetry() {
+    fun onAction(action: DetailAction) = when (action) {
+        DetailAction.FavoriteToggle -> onFavoriteToggle()
+        DetailAction.Retry -> onRetry()
+    }
+
+    private fun onRetry() {
         if (isFetching.value) return
         fetchFailed.value = false
         isFetching.value = true
@@ -78,7 +83,7 @@ internal class DetailViewModel(
         }
     }
 
-    fun onFavoriteToggle() {
+    private fun onFavoriteToggle() {
         val current = uiState.value as? DetailUiState.Success ?: return
         viewModelScope.launch {
             setFavorite(current.detail.toMovie(), isFavorite = !current.isFavorite)

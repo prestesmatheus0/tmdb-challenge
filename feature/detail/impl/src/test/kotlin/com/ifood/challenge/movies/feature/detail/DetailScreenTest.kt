@@ -12,6 +12,7 @@ import com.ifood.challenge.movies.core.network.ImageUrlBuilder
 import com.ifood.challenge.movies.core.network.PosterSize
 import com.ifood.challenge.movies.domain.movies.model.Genre
 import com.ifood.challenge.movies.domain.movies.model.MovieDetail
+import com.ifood.challenge.movies.feature.detail.internal.DetailAction
 import com.ifood.challenge.movies.feature.detail.internal.DetailScreen
 import com.ifood.challenge.movies.feature.detail.internal.DetailUiState
 import org.junit.Rule
@@ -35,15 +36,13 @@ class DetailScreenTest {
     private fun setContent(
         uiState: DetailUiState,
         onBack: () -> Unit = {},
-        onFavoriteToggle: () -> Unit = {},
-        onRetry: () -> Unit = {},
+        onAction: (DetailAction) -> Unit = {},
     ) {
         composeTestRule.setContent {
             DetailScreen(
                 uiState = uiState,
                 onBack = onBack,
-                onFavoriteToggle = onFavoriteToggle,
-                onRetry = onRetry,
+                onAction = onAction,
                 imageUrlBuilder = fakeImageUrlBuilder,
             )
         }
@@ -66,7 +65,7 @@ class DetailScreenTest {
         var retried = false
         setContent(
             uiState = DetailUiState.Error,
-            onRetry = { retried = true },
+            onAction = { if (it is DetailAction.Retry) retried = true },
         )
         composeTestRule.onNodeWithText("Tentar novamente").performClick()
         assertTrue(retried)
@@ -116,7 +115,7 @@ class DetailScreenTest {
         var toggled = false
         setContent(
             uiState = DetailUiState.Success(TEST_DETAIL, isFavorite = false),
-            onFavoriteToggle = { toggled = true },
+            onAction = { if (it is DetailAction.FavoriteToggle) toggled = true },
         )
         composeTestRule.onNodeWithText("Adicionar aos favoritos").performScrollTo().performClick()
         assertTrue(toggled)

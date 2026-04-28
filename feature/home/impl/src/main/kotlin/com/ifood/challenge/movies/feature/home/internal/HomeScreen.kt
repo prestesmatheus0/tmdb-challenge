@@ -63,11 +63,7 @@ internal fun HomeScreen(
     uiState: HomeUiState,
     movies: LazyPagingItems<Movie>,
     onMovieClick: (movieId: Int) -> Unit,
-    onFilterSelect: (HomeFilter) -> Unit,
-    onSearchQueryChange: (String) -> Unit,
-    onSearchToggle: () -> Unit,
-    onFavoriteToggle: (Movie) -> Unit,
-    onShuffle: () -> Unit,
+    onAction: (HomeAction) -> Unit,
     modifier: Modifier = Modifier,
     imageUrlBuilder: ImageUrlBuilder = koinInject(),
 ) {
@@ -79,7 +75,7 @@ internal fun HomeScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.home_title)) },
                 actions = {
-                    IconButton(onClick = onSearchToggle) {
+                    IconButton(onClick = { onAction(HomeAction.SearchToggle) }) {
                         Icon(
                             imageVector = if (uiState.isSearchActive) Icons.Default.SearchOff else Icons.Default.Search,
                             contentDescription = stringResource(
@@ -94,7 +90,7 @@ internal fun HomeScreen(
         floatingActionButton = {
             if (uiState.favoriteIds.isNotEmpty()) {
                 FloatingActionButton(
-                    onClick = onShuffle,
+                    onClick = { onAction(HomeAction.Shuffle) },
                     shape = MaterialTheme.shapes.large,
                 ) {
                     Icon(
@@ -112,7 +108,7 @@ internal fun HomeScreen(
                         inputField = {
                             SearchBarDefaults.InputField(
                                 query = uiState.searchQuery,
-                                onQueryChange = onSearchQueryChange,
+                                onQueryChange = { onAction(HomeAction.SearchQueryChange(it)) },
                                 onSearch = {},
                                 expanded = false,
                                 onExpandedChange = {},
@@ -153,7 +149,7 @@ internal fun HomeScreen(
                     FilterChipRow(
                         chips = allChips,
                         selected = uiState.filter,
-                        onSelect = onFilterSelect,
+                        onSelect = { onAction(HomeAction.FilterSelect(it)) },
                     )
                 }
 
@@ -163,7 +159,7 @@ internal fun HomeScreen(
                         favoriteIds = uiState.favoriteIds,
                         imageUrlBuilder = imageUrlBuilder,
                         onMovieClick = onMovieClick,
-                        onFavoriteToggle = onFavoriteToggle,
+                        onFavoriteToggle = { onAction(HomeAction.FavoriteToggle(it)) },
                     )
                     else -> PagingContent(
                         movies = movies,
@@ -172,7 +168,7 @@ internal fun HomeScreen(
                         isSearchActive = uiState.isSearchActive,
                         imageUrlBuilder = imageUrlBuilder,
                         onMovieClick = onMovieClick,
-                        onFavoriteToggle = onFavoriteToggle,
+                        onFavoriteToggle = { onAction(HomeAction.FavoriteToggle(it)) },
                     )
                 }
             }
@@ -341,11 +337,7 @@ private fun HomeScreenEmptyPreview() {
             uiState = HomeUiState(genres = PREVIEW_GENRES),
             movies = movies,
             onMovieClick = {},
-            onFilterSelect = {},
-            onSearchQueryChange = {},
-            onSearchToggle = {},
-            onFavoriteToggle = {},
-            onShuffle = {},
+            onAction = {},
             imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
         )
     }
@@ -365,11 +357,7 @@ private fun HomeScreenFavoritesPreview() {
             ),
             movies = movies,
             onMovieClick = {},
-            onFilterSelect = {},
-            onSearchQueryChange = {},
-            onSearchToggle = {},
-            onFavoriteToggle = {},
-            onShuffle = {},
+            onAction = {},
             imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
         )
     }
@@ -384,11 +372,7 @@ private fun HomeScreenOfflinePreview() {
             uiState = HomeUiState(isOffline = true, genres = PREVIEW_GENRES),
             movies = movies,
             onMovieClick = {},
-            onFilterSelect = {},
-            onSearchQueryChange = {},
-            onSearchToggle = {},
-            onFavoriteToggle = {},
-            onShuffle = {},
+            onAction = {},
             imageUrlBuilder = PREVIEW_IMAGE_BUILDER,
         )
     }
