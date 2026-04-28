@@ -116,6 +116,8 @@ app/
 │   └── testing/      ← MainDispatcherRule, TestDispatcherProvider
 ```
 
+**MVVM + Clean Architecture:** UI → ViewModel → UseCase → Repository → DataSource. Cada camada depende apenas da abstração da camada abaixo via `:public`. ViewModel expõe `StateFlow<UiState>` e a Screen é stateless — recebe dados e callbacks como parâmetros.
+
 **Padrão public/impl:** cada módulo expõe apenas interfaces e modelos via `:public`; a implementação fica em `:impl` e não vaza dependências de framework.
 
 **Inicialização de ViewModel:** lógica de inicialização (coleta de flows, carregamento inicial) fica em `onViewCreated()`, chamado via `LaunchedEffect(viewModel)` no arquivo de Navigation — não em `init`. Isso mantém o ViewModel testável sem efeitos colaterais na construção.
