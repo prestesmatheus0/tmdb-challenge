@@ -11,9 +11,9 @@ import com.ifood.challenge.movies.MainActivity
 import com.ifood.challenge.movies.infra.AppKoinTestRule
 import com.ifood.challenge.movies.infra.Fixtures
 import com.ifood.challenge.movies.infra.MockWebServerRule
+import com.ifood.challenge.movies.infra.DEFAULT_WAIT_MS
 import com.ifood.challenge.movies.infra.createLazyAndroidComposeRule
 import com.ifood.challenge.movies.infra.waitUntilTextDisplayed
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -71,12 +71,9 @@ class UserJourneyTest {
     fun genreFilter_callsDiscoverEndpoint() {
         compose.launch()
         compose.composeRule.waitUntilTextDisplayed("Ação").performClick()
-        compose.composeRule.waitUntilTextDisplayed("Inception")
-
-        assertTrue(
-            "Expected /discover/movie request, got: ${mockWebServer.requestedPaths}",
-            mockWebServer.hasRequestStartingWith("/discover/movie"),
-        )
+        compose.composeRule.waitUntil(timeoutMillis = DEFAULT_WAIT_MS) {
+            mockWebServer.hasRequestStartingWith("/discover/movie")
+        }
     }
 
     @Test
