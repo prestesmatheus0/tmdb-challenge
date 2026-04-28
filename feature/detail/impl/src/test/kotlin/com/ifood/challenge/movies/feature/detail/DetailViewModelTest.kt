@@ -92,6 +92,7 @@ class DetailViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect()
         }
+        viewModel.onViewCreated()
 
         assertIs<DetailUiState.Error>(viewModel.uiState.value)
     }
@@ -115,6 +116,7 @@ class DetailViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect()
         }
+        viewModel.onViewCreated()
 
         assertIs<DetailUiState.Error>(viewModel.uiState.value)
 

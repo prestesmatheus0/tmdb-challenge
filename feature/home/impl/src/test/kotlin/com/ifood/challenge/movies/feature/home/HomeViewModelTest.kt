@@ -79,6 +79,7 @@ class HomeViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect()
         }
+        viewModel.onViewCreated()
 
         assertEquals(TEST_GENRES, viewModel.uiState.value.genres)
         assertFalse(viewModel.uiState.value.genresError)
@@ -91,6 +92,7 @@ class HomeViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect()
         }
+        viewModel.onViewCreated()
 
         assertTrue(viewModel.uiState.value.genresError)
         assertTrue(viewModel.uiState.value.genres.isEmpty())
@@ -102,6 +104,7 @@ class HomeViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect()
         }
+        viewModel.onViewCreated()
 
         connectivityFlow.value = NetworkStatus.Offline
         assertTrue(viewModel.uiState.value.isOffline)
@@ -116,6 +119,7 @@ class HomeViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect()
         }
+        viewModel.onViewCreated()
 
         favoriteIdsFlow.value = setOf(1, 2, 3)
         assertEquals(setOf(1, 2, 3), viewModel.uiState.value.favoriteIds)
@@ -127,6 +131,7 @@ class HomeViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect()
         }
+        viewModel.onViewCreated()
 
         favoriteMoviesFlow.value = listOf(TEST_MOVIE)
         assertEquals(1, viewModel.uiState.value.favoriteMovies.size)
@@ -241,6 +246,7 @@ class HomeViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect()
         }
+        viewModel.onViewCreated()
 
         favoriteIdsFlow.value = setOf(TEST_MOVIE.id)
         viewModel.onFavoriteToggle(TEST_MOVIE)
@@ -255,6 +261,7 @@ class HomeViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect()
         }
+        viewModel.onViewCreated()
 
         val movie2 = TEST_MOVIE.copy(id = 99, title = "Movie 2")
         favoriteMoviesFlow.value = listOf(TEST_MOVIE, movie2)
